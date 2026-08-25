@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Universal Dynamic Vedic Clock & Age-Wise Guide</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: #0f172a;
+            color: #f8fafc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+            position: relative;
+        }
+
+        .clock-card {
+            background: #1e293b;
+            border: 2px solid #38bdf8;
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(56, 189, 248, 0.2);
+            text-align: center;
+            max-width: 520px;
+            width: 100%;
+            filter: blur(8px);
+            pointer-events: none;
+            transition: filter 0.3s ease;
+        }
+
+        .clock-card.unlocked {
+            filter: none;
+            pointer-events: auto;
+        }
+
+        .header-title {
+            color: #38bdf8;
+            font-size: 1.4rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .sub-title {
+            color: #94a3b8;
+            font-size: 0.8rem;
+            margin-bottom: 15px;
+        }
+
+        .location-box {
+            background: #0f172a;
+            padding: 12px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            border: 1px solid #334155;
+        }
+
+        .form-group {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+            justify-content: center;
+        }
+
+        select, input, button {
+            padding: 8px 12px;
+            border-radius: 6px;
+            border: 1px solid #475569;
+            background: #1e293b;
+            color: #f8fafc;
+            font-family: inherit;
+            font-size: 0.85rem;
+        }
+
+        button {
+            background: #0284c7;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: background 0.2s;
+        }
+
+        button:hover { background: #0369a1; }
+
+        .time-display {
+            font-size: 2.4rem;
+            font-weight: 700;
+            color: #f1f5f9;
+            font-family: monospace;
+            margin: 5px 0;
+        }
+
+        .date-display {
+            color: #94a3b8;
+            font-size: 0.85rem;
+            margin-bottom: 12px;
+        }
+
+        .sun-times {
+            display: flex;
+            justify-content: space-around;
+            background: #334155;
+            padding: 8px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            color: #cbd5e1;
+            margin-bottom: 15px;
+        }
+
+        .muhurta-box {
+            background: #0f172a;
+            border-radius: 12px;
+            padding: 15px;
+            border-left: 5px solid #f59e0b;
+            text-align: left;
+            margin-bottom: 15px;
+        }
+
+        .muhurta-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .muhurta-title {
+            font-size: 1.3rem;
+            color: #fbbf24;
+            font-weight: 700;
+        }
+
+        .muhurta-meta {
+            font-size: 0.85rem;
+            color: #cbd5e1;
+            margin-top: 4px;
+        }
+
+        .badge {
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.75rem;
+        }
+
+        .badge-auspicious { background: #059669; color: #ecfdf5; }
+        .badge-very-auspicious { background: #10b981; color: #ffffff; font-weight: 700; }
+        .badge-inauspicious { background: #dc2626; color: #fef2f2; }
+        .badge-neutral { background: #64748b; color: #f8fafc; }
+
+        .agewise-card {
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 10px;
+            padding: 10px;
+            margin-top: 10px;
+        }
+
+        .agewise-title {
+            font-size: 0.75rem;
+            color: #38bdf8;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .agewise-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+            text-align: left;
+        }
+
+        .age-item {
+            background: #0f172a;
+            padding: 6px 8px;
+            border-radius: 6px;
+            border-left: 3px solid #38bdf8;
+        }
+
+        .age-label {
+            font-size: 0.68rem;
+            color: #94a3b8;
+            font-weight: 600;
+        }
+
+        .age-action {
+            font-size: 0.85rem;
+            color: #f8fafc;
+            font-weight: 700;
+        }
+
+        .units-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-top: 15px;
+        }
+
+        .unit-item {
+            background: #334155;
+            padding: 8px;
+            border-radius: 8px;
+        }
+
+        .unit-val {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #38bdf8;
+            font-family: monospace;
+        }
+
+        .unit-lbl {
+            font-size: 0.68rem;
+            color: #94a3b8;
+            text-transform: uppercase;
+        }
+
+        /* Paywall Modal Styling */
+        .paywall-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(15, 23, 42, 0.92);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 20px;
+        }
+
+        .paywall-box {
+            background: #1e293b;
+            border: 2px solid #f59e0b;
+            border-radius: 16px;
+            padding: 24px;
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(245, 158, 11, 0.3);
+        }
+
+        .paywall-price {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: #10b981;
+            margin: 8px 0;
+        }
+
+        .qr-container {
+            background: #ffffff;
+            padding: 12px;
+            border-radius: 12px;
+            display: inline-block;
+            margin: 12px 0;
+        }
+
+        .qr-img {
+            width: 170px;
+            height: 170px;
+            display: block;
+        }
+
+        .pay-btn {
+            background: #10b981;
+            color: white;
+            font-weight: 700;
+            padding: 12px 16px;
+            width: 100%;
+            border-radius: 8px;
+            margin: 8px 0;
+            font-size: 0.95rem;
+            text-decoration: none;
+            display: block;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+
+        .pay-btn:hover { background: #059669; }
+
+        .tx-input {
+            width: 100%;
+            padding: 10px;
+            margin-top: 8px;
+            border-radius: 6px;
+            border: 1px solid #475569;
+            background: #0f172a;
+            color: white;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+
+        .verify-btn {
+            background: #f59e0b;
+            color: #0f172a;
+            font-weight: 700;
+            width: 100%;
+            padding: 10px;
+            margin-top: 8px;
+            border-radius: 6px;
+        }
+
+        .verify-btn:hover { background: #d97706; }
+    </style>
+</head>
+<body>
+
+<!-- Paywall Modal Overlay -->
+<div class="paywall-overlay" id="paywallModal">
+    <div class="paywall-box">
+        <h3 style="color: #fbbf24; font-size: 1.3rem;">Unlock Vedic Clock</h3>
+        <p style="font-size: 0.82rem; color: #cbd5e1; margin-top: 4px;">Pay ₹50 for Lifetime Access</p>
+        
+        <div class="paywall-price">₹ 50.00</div>
+
+        <!-- Dynamic QR Code generated for 9044440703@IOB -->
+        <div class="qr-container">
+            <img class="qr-img" src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=upi%3A%2F%2Fpay%3Fpa%3D9044440703%40IOB%26pn%3DMerchant%26am%3D50%26cu%3DINR" alt="UPI QR Code">
+        </div>
+
+        <!-- Direct UPI Link for Mobile Apps -->
+        <a class="pay-btn" href="upi://pay?pa=9044440703@IOB&pn=Merchant&am=50&cu=INR">Pay via UPI App (GPay/PhonePe)</a>
+
+        <div style="margin-top: 15px; border-top: 1px solid #334155; padding-top: 12px;">
+            <p style="font-size: 0.75rem; color: #94a3b8;">After payment, enter Transaction ID / UTR:</p>
+            <input type="text" id="utrInput" class="tx-input" placeholder="Enter 12-digit UTR Number">
+            <button class="verify-btn" onclick="verifyPayment()">Submit & Unlock Clock</button>
+        </div>
+    </div>
+</div>
+
+<!-- Clock Main Interface -->
+<div class="clock-card" id="mainClockCard">
+    <div class="header-title">Universal Vedic Clock</div>
+    <div class="sub-title">Real-Time Astronomical Calculations & Age-Wise Guide</div>
+
+    <div class="location-box">
+        <label style="font-size: 0.8rem; color: #cbd5e1; font-weight: 600;">Select Location:</label>
+        <div class="form-group">
+            <select id="city-select" onchange="handleCityChange()">
+                <option value="deoria" selected>Deoria, India</option>
+                <option value="delhi">New Delhi, India</option>
+                <option value="mumbai">Mumbai, India</option>
+                <option value="london">London, UK</option>
+                <option value="newyork">New York, USA</option>
+                <option value="tokyo">Tokyo, Japan</option>
+                <option value="sydney">Sydney, Australia</option>
+                <option value="custom">Custom Coordinates...</option>
+            </select>
+        </div>
+        <div class="form-group" id="custom-coords" style="display: none; margin-top: 6px;">
+            <input type="number" id="lat" placeholder="Latitude" step="any" style="width: 30%;">
+            <input type="number" id="lon" placeholder="Longitude" step="any" style="width: 30%;">
+            <button onclick="applyCustomCoords()">Apply</button>
+        </div>
+    </div>
+
+    <div class="time-display" id="clock">00:00:00 AM</div>
+    <div class="date-display" id="date-str">Loading Date...</div>
+
+    <div class="sun-times">
+        <div>🌅 Sunrise: <span id="sunrise-time" style="color:#fbbf24; font-weight:600;">--:--</span></div>
+        <div>🌇 Sunset: <span id="sunset-time" style="color:#f97316; font-weight:600;">--:--</span></div>
+    </div>
+
+    <div class="muhurta-box">
+        <div class="muhurta-header">
+            <span style="font-size: 0.72rem; color: #94a3b8; text-transform: uppercase;">Current Muhurta</span>
+            <span class="badge" id="muhurta-nature">--</span>
+        </div>
+        <div class="muhurta-title" id="muhurta-name">Calculating...</div>
+        <div class="muhurta-meta" id="muhurta-time">Period: --</div>
+        <div class="muhurta-meta" id="muhurta-deity">Deity: --</div>
+
+        <div class="agewise-card">
+            <div class="agewise-title">Age-Wise Action Suggestions</div>
+            <div class="agewise-grid">
+                <div class="age-item">
+                    <div class="age-label">Ages 5–18</div>
+                    <div class="age-action" id="act-5-18">--</div>
+                </div>
+                <div class="age-item">
+                    <div class="age-label">Ages 19–40</div>
+                    <div class="age-action" id="act-19-40">--</div>
+                </div>
+                <div class="age-item">
+                    <div class="age-label">Ages 41–60</div>
+                    <div class="age-action" id="act-41-60">--</div>
+                </div>
+                <div class="age-item">
+                    <div class="age-label">Ages 60+</div>
+                    <div class="age-action" id="act-60">--</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="units-grid">
+        <div class="unit-item">
+            <div class="unit-val" id="ghati">00</div>
+            <div class="unit-lbl">Ghati (घटी)</div>
+        </div>
+        <div class="unit-item">
+            <div class="unit-val" id="pal">00</div>
+            <div class="unit-lbl">Pal (पल)</div>
+        </div>
+        <div class="unit-item">
+            <div class="unit-val" id="vipal">00</div>
+            <div class="unit-lbl">Vipal (विपल)</div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Payment Verification and Unlocking Logic
+function verifyPayment() {
+    const utr = document.getElementById('utrInput').value.trim();
+    if (utr.length >= 6) {
+        document.getElementById('paywallModal').style.display = 'none';
+        document.getElementById('mainClockCard').classList.add('unlocked');
+        localStorage.setItem('vedicClockUnlocked', 'true');
+    } else {
+        alert('Please enter a valid Transaction / UTR ID to proceed.');
+    }
+}
+
+// Auto-unlock if user has already paid on this device
+if (localStorage.getItem('vedicClockUnlocked') === 'true') {
+    document.getElementById('paywallModal').style.display = 'none';
+    document.getElementById('mainClockCard').classList.add('unlocked');
+}
+
+const presetCities = {
+    deoria: { name: "Deoria, UP", lat: 26.5024, lon: 83.7781 },
+    delhi: { name: "New Delhi", lat: 28.6139, lon: 77.2090 },
+    mumbai: { name: "Mumbai", lat: 19.0760, lon: 72.8777 },
+    london: { name: "London", lat: 51.5074, lon: -0.1278 },
+    newyork: { name: "New York", lat: 40.7128, lon: -74.0060 },
+    tokyo: { name: "Tokyo", lat: 35.6762, lon: 139.6503 },
+    sydney: { name: "Sydney", lat: -33.8688, lon: 151.2093 }
+};
+
+let currentLat = presetCities.deoria.lat;
+let currentLon = presetCities.deoria.lon;
+
+const daytimeMuhurtas = [
+    { name: "1. रुद्र (Rudra)", nature: "Inauspicious", badge: "badge-inauspicious", deity: "रुद्र / शिव", act1: "Light Exercise", act2: "Intense Workout", act3: "Offer Water", act4: "Soft Breathing" },
+    { name: "2. अहिर (Ahi)", nature: "Inauspicious", badge: "badge-inauspicious", deity: "राहु / सर्प", act1: "Clean Room", act2: "Avoid Emails", act3: "Light Stretching", act4: "Chant Mantras" },
+    { name: "3. मित्र (Mitra)", nature: "Auspicious", badge: "badge-auspicious", deity: "मित्र (सूर्य देव)", act1: "Start Homework", act2: "Team Meetings", act3: "Plan Finances", act4: "Morning Walk" },
+    { name: "4. पितृ (Pitri)", nature: "Inauspicious", badge: "badge-inauspicious", deity: "पितर (पितृगण)", act1: "Revise Notes", act2: "Organize Desk", act3: "Honor Ancestors", act4: "Rest Mind" },
+    { name: "5. वसु (Vasu)", nature: "Auspicious", badge: "badge-auspicious", deity: "अष्ट वसु", act1: "Learn Math", act2: "Execute Projects", act3: "Wealth Investment", act4: "Read Scriptures" },
+    { name: "6. वराह (Varaha)", nature: "Auspicious", badge: "badge-auspicious", deity: "वराह विष्णु", act1: "Solve Test", act2: "Sign Contracts", act3: "Property Work", act4: "Garden Work" },
+    { name: "7. विश्वेदेव (Vishvedeva)", nature: "Auspicious", badge: "badge-auspicious", deity: "विश्वेदेव", act1: "Group Study", act2: "Client Calls", act3: "Community Work", act4: "Socialize Friends" },
+    { name: "8. अभिजित् (Abhijit)", nature: "Very Auspicious", badge: "badge-very-auspicious", deity: "ब्रह्मा / हरि", act1: "Submit Work", act2: "Launch Products", act3: "Major Purchases", act4: "Special Prayers" },
+    { name: "9. सतमुखी (Sutamukhi)", nature: "Auspicious", badge: "badge-auspicious", deity: "विश्वकर्मा", act1: "Art Craft", act2: "Creative Coding", act3: "Design Plans", act4: "Enjoy Music" },
+    { name: "10. पुरुहूत (Puruhuta)", nature: "Auspicious", badge: "badge-auspicious", deity: "इन्द्र देव", act1: "Eat Lunch", act2: "Power Lunch", act3: "Balanced Meal", act4: "Light Food" },
+    { name: "11. वाहिन (Vahini)", nature: "Neutral", badge: "badge-neutral", deity: "अग्नि देव", act1: "Silent Reading", act2: "Routine Tasks", act3: "File Audits", act4: "Short Nap" },
+    { name: "12. नक्तंचर (Naktanakara)", nature: "Inauspicious", badge: "badge-inauspicious", deity: "राक्षस / नैरृत", act1: "Avoid Fights", act2: "Pause Deals", act3: "Avoid Arguments", act4: "Stay Hydrated" },
+    { name: "13. वरुण (Varuna)", nature: "Auspicious", badge: "badge-auspicious", deity: "वरुण देव", act1: "Outdoor Sports", act2: "Network Events", act3: "Travel Work", act4: "Evening Walk" },
+    { name: "14. अर्यमा (Aryama)", nature: "Auspicious", badge: "badge-auspicious", deity: "अर्यमा", act1: "Play Games", act2: "Build Relationships", act3: "Family Time", act4: "Bless Youth" },
+    { name: "15. भग (Bhaga)", nature: "Auspicious", badge: "badge-auspicious", deity: "भग (आदित्य देव)", act1: "Hobby Time", act2: "Wrap Work", act3: "Home Returns", act4: "Evening Aarti" }
+];
+
+const nighttimeMuhurtas = [
+    { name: "16. गिरीश (Girisha)", nature: "Auspicious", badge: "badge-auspicious", deity: "शिव (गिरीश)", act1: "Evening Prayer", act2: "Family Dinner", act3: "Reflect Day", act4: "Early Rest" },
+    { name: "17. अजपाद (Ajapada)", nature: "Auspicious", badge: "badge-auspicious", deity: "अज एकपाद", act1: "Read Stories", act2: "Planning Tomorrow", act3: "Spiritual Reading", act4: "Peaceful Music" },
+    { name: "18. अहिर्बुध्न्य (Ahirbudhnya)", nature: "Auspicious", badge: "badge-auspicious", deity: "अहिर्बुध्न्य", act1: "Light Reading", act2: "Meditation Practice", act3: "Relaxation Walk", act4: "Quiet Prayer" },
+    { name: "19. पुष्य (Pushya)", nature: "Auspicious", badge: "badge-auspicious", deity: "बृहस्पति", act1: "Bedtime Routine", act2: "Journal Thoughts", act3: "Gratitude Meditation", act4: "Night Prayers" },
+    { name: "20. अश्विनी (Ashwini)", nature: "Auspicious", badge: "badge-auspicious", deity: "अश्विनी कुमार", act1: "Deep Sleep", act2: "Deep Sleep", act3: "Deep Sleep", act4: "Deep Sleep" },
+    { name: "21. यम (Yama)", nature: "Inauspicious", badge: "badge-inauspicious", deity: "यमराज", act1: "Rest Well", act2: "Rest Well", act3: "Rest Well", act4: "Rest Well" },
+    { name: "22. अग्नि (Agni)", nature: "Auspicious", badge: "badge-auspicious", deity: "अग्नि देव", act1: "Rest Well", act2: "Rest Well", act3: "Rest Well", act4: "Rest Well" },
+    { name: "23. विधाता (Vidhata)", nature: "Auspicious", badge: "badge-auspicious", deity: "विधाता / विधि", act1: "Rest Well", act2: "Rest Well", act3: "Rest Well", act4: "Rest Well" },
+    { name: "24. कण्ड (Kanda)", nature: "Neutral", badge: "badge-neutral", deity: "चन्द्र देव (सोम)", act1: "Rest Well", act2: "Rest Well", act3: "Rest Well", act4: "Rest Well" },
+    { name: "25. अदिति (Aditi)", nature: "Auspicious", badge: "badge-auspicious", deity: "अदिति", act1: "Rest Well", act2: "Rest Well", act3: "Rest Well", act4: "Rest Well" },
+    { name: "26. अमृत / जीव (Amrita)", nature: "Very Auspicious", badge: "badge-very-auspicious", deity: "धन्वन्तरि", act1: "Sweet Dreams", act2: "Deep Meditation", act3: "Deep Meditation", act4: "Early Awakening" },
+    { name: "27. विष्णु (Vishnu)", nature: "Auspicious", badge: "badge-auspicious", deity: "भगवान् विष्णु", act1: "Quiet Rest", act2: "Brahma Muhurta", act3: "Brahma Muhurta", act4: "Spiritual Study" },
+    { name: "28. द्युमद्गद्युति (Dyumadgadyuti)", nature: "Auspicious", badge: "badge-auspicious", deity: "सूर्य", act1: "Early Awake", act2: "Morning Yoga", act3: "Morning Prayers", act4: "Gentle Stretch" },
+    { name: "29. ब्रह्म (Brahma)", nature: "Spiritual", badge: "badge-auspicious", deity: "ब्रह्मदेव", act1: "Study / Prayer", act2: "Meditation / Yoga", act3: "Chanting / Japa", act4: "Holy Thoughts" },
+    { name: "30. समुद्र (Samudra)", nature: "Auspicious", badge: "badge-auspicious", deity: "समुद्र देव", act1: "Prepare School", act2: "Morning Walk", act3: "Sunrise Worship", act4: "Morning Prayer" }
+];
+
+function calculateSunriseSunset(date, lat, lon) {
+    const dayOfYear = Math.floor((date - new Date(date.getFullYear(), 0, 0)) / 1000 / 60 / 60 / 24);
+    const declination = 23.45 * Math.sin((2 * Math.PI / 365) * (dayOfYear - 81));
+    const latRad = lat * (Math.PI / 180);
+    const declRad = declination * (Math.PI / 180);
+    const cosHA = (Math.cos(90.833 * Math.PI / 180) - (Math.sin(latRad) * Math.sin(declRad))) / (Math.cos(latRad) * Math.cos(declRad));
+    
+    if (cosHA > 1 || cosHA < -1) {
+        let sr = new Date(date); sr.setHours(6, 0, 0, 0);
+        let ss = new Date(date); ss.setHours(18, 0, 0, 0);
+        return { sunrise: sr, sunset: ss };
+    }
+    
+    const ha = Math.acos(cosHA) * (180 / Math.PI);
+    const B = (2 * Math.PI / 365) * (dayOfYear - 81);
+    const eot = 9.87 * Math.sin(2 * B) - 7.53 * Math.cos(B) - 1.5 * Math.sin(B);
+    const solarNoonMinutes = 720 - (4 * lon) - eot;
+    const sunriseMinutes = solarNoonMinutes - (ha * 4);
+    const sunsetMinutes = solarNoonMinutes + (ha * 4);
+    const tzOffsetMinutes = -date.getTimezoneOffset();
+    const srMs = (sunriseMinutes + tzOffsetMinutes) * 60 * 1000;
+    const ssMs = (sunsetMinutes + tzOffsetMinutes) * 60 * 1000;
+    const baseDateMs = new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime();
+    
+    return {
+        sunrise: new Date(baseDateMs + srMs),
+        sunset: new Date(baseDateMs + ssMs)
+    };
+}
+
+function handleCityChange() {
+    const val = document.getElementById('city-select').value;
+    if (val === 'custom') {
+        document.getElementById('custom-coords').style.display = 'flex';
+    } else {
+        document.getElementById('custom-coords').style.display = 'none';
+        currentLat = presetCities[val].lat;
+        currentLon = presetCities[val].lon;
+        updateVedicClock();
+    }
+}
+
+function applyCustomCoords() {
+    const latVal = parseFloat(document.getElementById('lat').value);
+    const lonVal = parseFloat(document.getElementById('lon').value);
+    if (!isNaN(latVal) && !isNaN(lonVal)) {
+        currentLat = latVal;
+        currentLon = lonVal;
+        updateVedicClock();
+    }
+}
+
+function formatTime(d) {
+    return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
+}
+
+function formatShortTime(d) {
+    return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
+}
+
+function updateVedicClock() {
+    const now = new Date();
+    document.getElementById('clock').innerText = formatTime(now);
+    document.getElementById('date-str').innerText = now.toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+
+    const sunTimes = calculateSunriseSunset(now, currentLat, currentLon);
+    const sunrise = sunTimes.sunrise;
+    const sunset = sunTimes.sunset;
+
+    document.getElementById('sunrise-time').innerText = formatShortTime(sunrise);
+    document.getElementById('sunset-time').innerText = formatShortTime(sunset);
+
+    let dayStart = new Date(sunrise);
+    if (now < sunrise) {
+        dayStart.setDate(dayStart.getDate() - 1);
+    }
+
+    const diffMs = now - dayStart;
+    const totalSecs = diffMs / 1000;
+
+    const ghati = Math.floor(totalSecs / 1440);
+    const remSecs1 = totalSecs % 1440;
+    const pal = Math.floor(remSecs1 / 24);
+    const remSecs2 = remSecs1 % 24;
+    const vipal = Math.floor(remSecs2 / 0.4);
+
+    document.getElementById('ghati').innerText = String(ghati).padStart(2, '0');
+    document.getElementById('pal').innerText = String(pal).padStart(2, '0');
+    document.getElementById('vipal').innerText = String(vipal).padStart(2, '0');
+
+    let currentMuhurta, startTime, endTime;
+    const dayDurationMs = sunset - sunrise;
+    const nightDurationMs = (24 * 3600 * 1000) - dayDurationMs;
+
+    const dayMuhurtaLen = dayDurationMs / 15;
+    const nightMuhurtaLen = nightDurationMs / 15;
+
+    if (now >= sunrise && now < sunset) {
+        const elapsed = now - sunrise;
+        const idx = Math.min(14, Math.floor(elapsed / dayMuhurtaLen));
+        currentMuhurta = daytimeMuhurtas[idx];
+        startTime = new Date(sunrise.getTime() + idx * dayMuhurtaLen);
+        endTime = new Date(sunrise.getTime() + (idx + 1) * dayMuhurtaLen);
+    } else {
+        let nightStart = now >= sunset ? sunset : new Date(sunset.getTime() - 24 * 3600 * 1000);
+        const elapsed = now - nightStart;
+        const idx = Math.min(14, Math.floor(elapsed / nightMuhurtaLen));
+        currentMuhurta = nighttimeMuhurtas[idx];
+        startTime = new Date(nightStart.getTime() + idx * nightMuhurtaLen);
+        endTime = new Date(nightStart.getTime() + (idx + 1) * nightMuhurtaLen);
+    }
+
+    document.getElementById('muhurta-name').innerText = currentMuhurta.name;
+    document.getElementById('muhurta-time').innerText = "Period: " + formatShortTime(startTime) + " – " + formatShortTime(endTime);
+    document.getElementById('muhurta-deity').innerText = "Deity: " + currentMuhurta.deity;
+    
+    const natureBadge = document.getElementById('muhurta-nature');
+    natureBadge.innerText = currentMuhurta.nature;
+    natureBadge.className = "badge " + currentMuhurta.badge;
+
+    document.getElementById('act-5-18').innerText = currentMuhurta.act1;
+    document.getElementById('act-19-40').innerText = currentMuhurta.act2;
+    document.getElementById('act-41-60').innerText = currentMuhurta.act3;
+    document.getElementById('act-60').innerText = currentMuhurta.act4;
+}
+
+setInterval(updateVedicClock, 400);
+updateVedicClock();
+</script>
+
+</body>
+</html>
