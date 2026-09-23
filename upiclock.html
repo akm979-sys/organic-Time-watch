@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Universal Dynamic Vedic Clock & Age-Wise Guide</title>
+    <title>Universal Dynamic Vedic Clock, Tithi Panchang & Age-Wise Guide</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
 
@@ -162,11 +162,18 @@
         button:hover { background: #0369a1; }
 
         .time-display {
-            font-size: 2.4rem;
+            font-size: 2.2rem;
             font-weight: 700;
             color: #f1f5f9;
             font-family: monospace;
             margin: 5px 0;
+        }
+
+        .location-tz-tag {
+            font-size: 0.78rem;
+            color: #38bdf8;
+            font-weight: 600;
+            margin-bottom: 2px;
         }
 
         .date-display {
@@ -184,6 +191,34 @@
             font-size: 0.8rem;
             color: #cbd5e1;
             margin-bottom: 15px;
+        }
+
+        /* Tithi Box */
+        .tithi-box {
+            background: #0f172a;
+            border: 1px solid #334155;
+            border-radius: 12px;
+            padding: 12px;
+            margin-bottom: 15px;
+            text-align: left;
+        }
+
+        .tithi-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .tithi-title {
+            color: #e2e8f0;
+            font-weight: 700;
+            font-size: 0.95rem;
+        }
+
+        .tithi-sub {
+            color: #94a3b8;
+            font-size: 0.78rem;
+            margin-top: 2px;
         }
 
         /* Navigation Tab Buttons for Muhurtas */
@@ -499,24 +534,26 @@
         <label style="font-size: 0.8rem; color: #cbd5e1; font-weight: 600;">Select Location:</label>
         <div class="form-group">
             <select id="city-select" onchange="handleCityChange()">
-                <option value="deoria" selected>Deoria, India</option>
-                <option value="delhi">New Delhi, India</option>
-                <option value="mumbai">Mumbai, India</option>
-                <option value="london">London, UK</option>
-                <option value="newyork">New York, USA</option>
-                <option value="tokyo">Tokyo, Japan</option>
-                <option value="sydney">Sydney, Australia</option>
+                <option value="deoria" selected>Deoria, India (IST)</option>
+                <option value="delhi">New Delhi, India (IST)</option>
+                <option value="mumbai">Mumbai, India (IST)</option>
+                <option value="london">London, UK (BST/GMT)</option>
+                <option value="newyork">New York, USA (EDT)</option>
+                <option value="tokyo">Tokyo, Japan (JST)</option>
+                <option value="sydney">Sydney, Australia (AEST)</option>
                 <option value="custom">Custom Coordinates...</option>
             </select>
         </div>
         <div class="form-group" id="custom-coords" style="display: none; margin-top: 6px;">
-            <input type="number" id="lat" placeholder="Latitude" step="any" style="width: 30%;">
-            <input type="number" id="lon" placeholder="Longitude" step="any" style="width: 30%;">
+            <input type="number" id="lat" placeholder="Lat" step="any" style="width: 28%;">
+            <input type="number" id="lon" placeholder="Lon" step="any" style="width: 28%;">
+            <input type="number" id="tz-offset" placeholder="TZ Offset (hrs)" step="any" style="width: 28%;">
             <button onclick="applyCustomCoords()">Apply</button>
         </div>
     </div>
 
-    <!-- Clock & Date -->
+    <!-- Clock Display -->
+    <div class="location-tz-tag" id="loc-name-tag">Deoria, India</div>
     <div class="time-display" id="clock">00:00:00 AM</div>
     <div class="date-display" id="date-str">Loading Date...</div>
 
@@ -524,6 +561,19 @@
     <div class="sun-times">
         <div>🌅 Sunrise: <span id="sunrise-time" style="color:#fbbf24; font-weight:600;">--:--</span></div>
         <div>🌇 Sunset: <span id="sunset-time" style="color:#f97316; font-weight:600;">--:--</span></div>
+    </div>
+
+    <!-- Daily Tithi Panchang -->
+    <div class="tithi-box">
+        <div class="tithi-header">
+            <span style="font-size: 0.72rem; color: #38bdf8; text-transform: uppercase; font-weight:700;">Daily Panchang Tithi</span>
+            <span id="tithi-paksha" class="badge badge-neutral">--</span>
+        </div>
+        <div class="tithi-title" id="tithi-name">Calculating Tithi...</div>
+        <div class="tithi-sub" id="tithi-progress">Lunar Elapsed: --%</div>
+        <div>
+            <span class="interp-link" onclick="openTithiModal()">📜 View Brief Tithi Interpretation</span>
+        </div>
     </div>
 
     <!-- Muhurta Tabs (Now / Next / Latter) -->
@@ -590,7 +640,7 @@
     <button class="support-btn" onclick="openPaymentModal()">💖 Want to support this Vedic Watch</button>
 </div>
 
-<!-- Interpretation Modal -->
+<!-- Muhurta Interpretation Modal -->
 <div class="modal-overlay" id="interp-modal">
     <div class="modal-content">
         <button class="modal-close" onclick="closeInterpretationModal()">✕</button>
@@ -602,6 +652,18 @@
     </div>
 </div>
 
+<!-- Tithi Interpretation Modal -->
+<div class="modal-overlay" id="tithi-modal">
+    <div class="modal-content">
+        <button class="modal-close" onclick="closeTithiModal()">✕</button>
+        <div class="modal-title" id="tithi-modal-title">Tithi Panchang Interpretation</div>
+        <div class="interp-line">1. <span>Ruling Deity:</span> <span id="tithi-l1" style="color:#cbd5e1;">--</span></div>
+        <div class="interp-line">2. <span>Energy & Nature:</span> <span id="tithi-l2" style="color:#cbd5e1;">--</span></div>
+        <div class="interp-line">3. <span>Favorable Tasks:</span> <span id="tithi-l3" style="color:#cbd5e1;">--</span></div>
+        <div class="interp-line">4. <span>Unfavorable Tasks:</span> <span id="tithi-l4" style="color:#cbd5e1;">--</span></div>
+    </div>
+</div>
+
 <!-- Dynamic UPI Payment QR & Prompt Modal -->
 <div class="modal-overlay" id="payment-modal">
     <div class="modal-content" style="text-align: center;">
@@ -609,7 +671,6 @@
         <div class="modal-title" style="color:#38bdf8;">Support Vedic Watch</div>
         <p style="font-size: 0.8rem; color: #cbd5e1; margin-bottom: 10px;">Select or enter an amount:</p>
         
-        <!-- Preset Amount Pills -->
         <div class="amount-pills">
             <button class="amt-btn" onclick="updateQRAmount(51)">₹51</button>
             <button class="amt-btn active" onclick="updateQRAmount(108)">₹108</button>
@@ -620,7 +681,6 @@
             <input type="number" id="custom-amt-input" placeholder="Custom Amount (₹)" style="width: 140px; text-align: center;" onchange="updateQRAmount(this.value)">
         </div>
 
-        <!-- Direct Mobile Deep Link Prompt Button -->
         <a id="upi-direct-link" href="#" class="upi-trigger-btn">📱 Pay via Installed UPI App</a>
 
         <div class="qr-container">
@@ -633,62 +693,83 @@
 </div>
 
 <script>
-// Worldwide Preset Cities
+// Preset Cities with exact UTC Offset in Hours
 const presetCities = {
-    deoria: { name: "Deoria, UP", lat: 26.5024, lon: 83.7781 },
-    delhi: { name: "New Delhi", lat: 28.6139, lon: 77.2090 },
-    mumbai: { name: "Mumbai", lat: 19.0760, lon: 72.8777 },
-    london: { name: "London", lat: 51.5074, lon: -0.1278 },
-    newyork: { name: "New York", lat: 40.7128, lon: -74.0060 },
-    tokyo: { name: "Tokyo", lat: 35.6762, lon: 139.6503 },
-    sydney: { name: "Sydney", lat: -33.8688, lon: 151.2093 }
+    deoria: { name: "Deoria, UP", lat: 26.5024, lon: 83.7781, tz: 5.5 },
+    delhi: { name: "New Delhi", lat: 28.6139, lon: 77.2090, tz: 5.5 },
+    mumbai: { name: "Mumbai", lat: 19.0760, lon: 72.8777, tz: 5.5 },
+    london: { name: "London", lat: 51.5074, lon: -0.1278, tz: 1.0 },
+    newyork: { name: "New York", lat: 40.7128, lon: -74.0060, tz: -4.0 },
+    tokyo: { name: "Tokyo", lat: 35.6762, lon: 139.6503, tz: 9.0 },
+    sydney: { name: "Sydney", lat: -33.8688, lon: 151.2093, tz: 10.0 }
 };
 
 let currentLat = presetCities.deoria.lat;
 let currentLon = presetCities.deoria.lon;
-let activeTabOffset = 0; // 0 = Now, 1 = Next, 2 = Latter
+let currentTz = presetCities.deoria.tz;
+let activeTabOffset = 0;
 let cachedSelectedMuhurta = null;
+let cachedTithiData = null;
 const upiID = "AKM979trust@iob";
+
+// Tithi Metadata
+const tithiDetails = [
+    { name: "Pratipada (प्रतिपदा)", deity: "Agni (अग्नि)", nature: "Nanda (Growth)", fav: "Housewarming, religious rituals, beginning new tasks.", unfav: "Travel, aggressive actions." },
+    { name: "Dwitiya (द्वितीया)", deity: "Brahma (ब्रह्मा)", nature: "Bhadra (Auspicious)", fav: "Laying foundation, weddings, firm actions.", unfav: "Cruel deeds, litigation." },
+    { name: "Tritiya (तृतीया)", deity: "Gauri (गौरी)", nature: "Jaya (Victory)", fav: "Music, arts, education, military strategy.", unfav: "Resting, inactivity." },
+    { name: "Chaturthi (चतुर्थी)", deity: "Ganesha (गणेश)", nature: "Rikta (Empty)", fav: "Removal of obstacles, fire work, cleaning.", unfav: "Major financial investments, marriage." },
+    { name: "Panchami (पञ्चमी)", deity: "NagDev / Saraswati", nature: "Purna (Fulfilling)", fav: "Medicine, learning, spiritual study.", unfav: "Negative thoughts, arguments." },
+    { name: "Shashthi (षष्ठी)", deity: "Kartikeya (कार्तिकेय)", nature: "Nanda (Growth)", fav: "Coronation, meeting friends, architecture.", unfav: "Oil massage, long journeys." },
+    { name: "Saptami (सप्तमी)", deity: "Surya (सूर्य देव)", nature: "Bhadra (Auspicious)", fav: "Travel, vehicle purchase, diplomacy.", unfav: "Harsh punishments." },
+    { name: "Ashtami (अष्टमी)", deity: "Durga / Rudra", nature: "Jaya (Victory)", fav: "Defense, wrestling, spiritual fasting.", unfav: "Starting peace negotiations." },
+    { name: "Navami (नवमी)", deity: "Durga / Saraswati", nature: "Rikta (Empty)", fav: "Destruction of evil, athletic training.", unfav: "Travel, auspicious celebrations." },
+    { name: "Dashami (दशमी)", deity: "Yama / Dharma", nature: "Purna (Fulfilling)", fav: "Government work, spiritual initiatives.", unfav: "Negative gossip." },
+    { name: "Ekadashi (एकादशी)", deity: "Vishnu (विष्णु)", nature: "Nanda (Growth)", fav: "Fasting, meditation, devotional work.", unfav: "Grains, heavy physical work." },
+    { name: "Dwadashi (द्वादशी)", deity: "Vishnu / Aditi", nature: "Bhadra (Auspicious)", fav: "Charity, vows completion, rituals.", unfav: "Inaction, disputes." },
+    { name: "Trayodashi (त्रयोदशी)", deity: "Kamadeva / Shiva", nature: "Jaya (Victory)", fav: "Romance, friendship,Pradosh worship.", unfav: "Travel to far places." },
+    { name: "Chaturdashi (चतुर्दशी)", deity: "Shiva / Kali", nature: "Rikta (Empty)", fav: "Shiva Puja, spiritual Sadhana.", unfav: "Marriage, travel, new ventures." },
+    { name: "Purnima / Amavasya", deity: "Chandra / Pitrus", nature: "Purna (Complete)", fav: "Full Moon Puja or Ancestral homage.", unfav: "Aggressive arguments." }
+];
 
 // 15 Daytime Muhurtas
 const daytimeMuhurtas = [
-    { name: "1. रुद्र (Rudra)", nature: "Inauspicious", badge: "badge-inauspicious", deity: "रुद्र / शिव", act1: "Light Exercise", act2: "Intense Workout", act3: "Offer Water", act4: "Soft Breathing", l1: "Governed by fierce Rudra energy, suitable for physical exertion.", l2: "Solitary workouts, rigorous cleaning, discipline practices.", l3: "New business ventures, contracts, peace talks.", l4: "Aggressive energy requires focus and internal grounding." },
-    { name: "2. अहिर (Ahi)", nature: "Inauspicious", badge: "badge-inauspicious", deity: "राहु / सर्प", act1: "Clean Room", act2: "Avoid Emails", act3: "Light Stretching", act4: "Chant Mantras", l1: "Ruled by serpent energy, high potential for misunderstandings.", l2: "Organizing physical space, self-reflection, silent chanting.", l3: "Signing legal docs, critical communication, conflicts.", l4: "Illusory forces are active; remain cautious and steady." },
-    { name: "3. मित्र (Mitra)", nature: "Auspicious", badge: "badge-auspicious", deity: "मित्र (सूर्य देव)", act1: "Start Homework", act2: "Team Meetings", act3: "Plan Finances", act4: "Morning Walk", l1: "Harmonious solar energy encouraging friendship and trust.", l2: "Collaborative projects, networking, launching group tasks.", l3: "Confrontation, isolation, harsh discipline.", l4: "Friendly radiation promotes smooth interpersonal exchanges." },
-    { name: "4. पितृ (Pitri)", nature: "Inauspicious", badge: "badge-inauspicious", deity: "पितर (पितृगण)", act1: "Revise Notes", act2: "Organize Desk", act3: "Honor Ancestors", act4: "Rest Mind", l1: "Dedicated to ancestors and karmic reflection.", l2: "Ancestral prayers, quiet study, auditing, paying debts.", l3: "Celebrations, weddings, grand public announcements.", l4: "Energy is introspective and focused on honoring past lineages." },
-    { name: "5. वसु (Vasu)", nature: "Auspicious", badge: "badge-auspicious", deity: "अष्ट वसु", act1: "Learn Math", act2: "Execute Projects", act3: "Wealth Investment", act4: "Read Scriptures", l1: "Associated with abundance, material gain, and stability.", l2: "Financial investments, buying property, analytical work.", l3: "Reckless spending, frivolous arguments.", l4: "The eight Vasus shower stability and material growth." },
-    { name: "6. वराह (Varaha)", nature: "Auspicious", badge: "badge-auspicious", deity: "वराह विष्णु", act1: "Solve Test", act2: "Sign Contracts", act3: "Property Work", act4: "Garden Work", l1: "Resilient energy focused on overcoming obstacles.", l2: "Contract signing, land transactions, decisive problem solving.", l3: "Procrastination, hesitancy, surrender.", l4: "Varaha Avatar energy lifts burdens and solidifies success." },
-    { name: "7. विश्वेदेव (Vishvedeva)", nature: "Auspicious", badge: "badge-auspicious", deity: "विश्वेदेव", act1: "Group Study", act2: "Client Calls", act3: "Community Work", act4: "Socialize Friends", l1: "Universal cosmic harmony and good will.", l2: "Public engagements, client discussions, community service.", l3: "Egoistic disputes, selfish motives.", l4: "Supported by all deities for smooth execution." },
-    { name: "8. अभिजित् (Abhijit)", nature: "Very Auspicious", badge: "badge-very-auspicious", deity: "ब्रह्मा / हरि", act1: "Submit Work", act2: "Launch Products", act3: "Major Purchases", act4: "Special Prayers", l1: "The most victorious period of the daytime.", l2: "Major product launches, critical decisions, key purchases.", l3: "Southward travel during this specific time.", l4: "Destroys all negative doshas automatically." },
-    { name: "9. सतमुखी (Sutamukhi)", nature: "Auspicious", badge: "badge-auspicious", deity: "विश्वकर्मा", act1: "Art Craft", act2: "Creative Coding", act3: "Design Plans", act4: "Enjoy Music", l1: "Creative and artistic vibration ruled by Vishwakarma.", l2: "Designing, coding, artistic projects, innovation.", l3: "Monotonous administrative work, legal disputes.", l4: "Fosters creative flow and architectural precision." },
-    { name: "10. पुरुहूत (Puruhuta)", nature: "Auspicious", badge: "badge-auspicious", deity: "इन्द्र देव", act1: "Eat Lunch", act2: "Power Lunch", act3: "Balanced Meal", act4: "Light Food", l1: "Empowered energy associated with nourishment and leadership.", l2: "Meals, executive decisions, leadership gatherings.", l3: "Extreme fasting or overexertion.", l4: "Indra's strength maintains vitality and authority." },
-    { name: "11. वाहिन (Vahini)", nature: "Neutral", badge: "badge-neutral", deity: "अग्नि देव", act1: "Silent Reading", act2: "Routine Tasks", act3: "File Audits", act4: "Short Nap", l1: "Transformative fire element, requiring steady focus.", l2: "Data filing, routine execution, quiet reading.", l3: "Impulsive financial risks or angry discussions.", l4: "Fire energy can consume if not harnessed with composure." },
-    { name: "12. नक्तंचर (Naktanakara)", nature: "Inauspicious", badge: "badge-inauspicious", deity: "राक्षस / नैरृत", act1: "Avoid Fights", act2: "Pause Deals", act3: "Avoid Arguments", act4: "Stay Hydrated", l1: "Shadow period where emotional clarity drops.", l2: "Hydration, taking a pause, light administrative review.", l3: "Important negotiations, partnership deals.", l4: "Restless energy can cause misunderstandings." },
-    { name: "13. वरुण (Varuna)", nature: "Auspicious", badge: "badge-auspicious", deity: "वरुण देव", act1: "Outdoor Sports", act2: "Network Events", act3: "Travel Work", act4: "Evening Walk", l1: "Fluid and expansive water deity energy.", l2: "Travel, outdoor activities, relationship building.", l3: "Stagnant work, lingering in conflict.", l4: "Varuna clears impurities and lubricates interactions." },
-    { name: "14. अर्यमा (Aryama)", nature: "Auspicious", badge: "badge-auspicious", deity: "अर्यमा", act1: "Play Games", act2: "Build Relationships", act3: "Family Time", act4: "Bless Youth", l1: "Warm social energy supporting noble family bonds.", l2: "Family bonding, mentorship, leisure sports.", l3: "Harsh business cuts, solitary isolation.", l4: "Aryama governs social harmony and chivalry." },
-    { name: "15. भग (Bhaga)", nature: "Auspicious", badge: "badge-auspicious", deity: "भग (आदित्य देव)", act1: "Hobby Time", act2: "Wrap Work", act3: "Home Returns", act4: "Evening Aarti", l1: "Solar sunset transition bringer of luck and comfort.", l2: "Wrapping up daily tasks, evening prayers, home return.", l3: "Starting fresh long-term projects.", l4: "Prepares mind for peaceful twilight transition." }
+    { name: "1. रुद्र (Rudra)", nature: "Inauspicious", badge: "badge-inauspicious", deity: "रुद्र / शिव", act1: "Light Exercise", act2: "Intense Workout", act3: "Offer Water", act4: "Soft Breathing", l1: "Governed by fierce Rudra energy.", l2: "Solitary workouts, rigorous cleaning.", l3: "New business ventures, peace talks.", l4: "Aggressive energy requires internal grounding." },
+    { name: "2. अहिर (Ahi)", nature: "Inauspicious", badge: "badge-inauspicious", deity: "राहु / सर्प", act1: "Clean Room", act2: "Avoid Emails", act3: "Light Stretching", act4: "Chant Mantras", l1: "Ruled by serpent energy.", l2: "Organizing physical space, self-reflection.", l3: "Signing legal docs, conflicts.", l4: "Illusory forces active; stay cautious." },
+    { name: "3. मित्र (Mitra)", nature: "Auspicious", badge: "badge-auspicious", deity: "मित्र (सूर्य देव)", act1: "Start Homework", act2: "Team Meetings", act3: "Plan Finances", act4: "Morning Walk", l1: "Harmonious solar energy encouraging trust.", l2: "Collaborative projects, networking.", l3: "Confrontation, isolation.", l4: "Friendly radiation promotes smooth exchanges." },
+    { name: "4. पितृ (Pitri)", nature: "Inauspicious", badge: "badge-inauspicious", deity: "पितर (पितृगण)", act1: "Revise Notes", act2: "Organize Desk", act3: "Honor Ancestors", act4: "Rest Mind", l1: "Dedicated to ancestors.", l2: "Ancestral prayers, quiet study, auditing.", l3: "Celebrations, grand announcements.", l4: "Energy is introspective and respectful." },
+    { name: "5. वसु (Vasu)", nature: "Auspicious", badge: "badge-auspicious", deity: "अष्ट वसु", act1: "Learn Math", act2: "Execute Projects", act3: "Wealth Investment", act4: "Read Scriptures", l1: "Associated with abundance and material gain.", l2: "Financial investments, analytical work.", l3: "Reckless spending, frivolous arguments.", l4: "Vasus shower stability and growth." },
+    { name: "6. वराह (Varaha)", nature: "Auspicious", badge: "badge-auspicious", deity: "वराह विष्णु", act1: "Solve Test", act2: "Sign Contracts", act3: "Property Work", act4: "Garden Work", l1: "Resilient energy for overcoming obstacles.", l2: "Contract signing, land transactions.", l3: "Procrastination, hesitancy.", l4: "Varaha energy lifts burdens." },
+    { name: "7. विश्वेदेव (Vishvedeva)", nature: "Auspicious", badge: "badge-auspicious", deity: "विश्वेदेव", act1: "Group Study", act2: "Client Calls", act3: "Community Work", act4: "Socialize Friends", l1: "Universal cosmic harmony.", l2: "Public engagements, client discussions.", l3: "Egoistic disputes, selfish motives.", l4: "Supported by all deities." },
+    { name: "8. अभिजित् (Abhijit)", nature: "Very Auspicious", badge: "badge-very-auspicious", deity: "ब्रह्मा / हरि", act1: "Submit Work", act2: "Launch Products", act3: "Major Purchases", act4: "Special Prayers", l1: "Most victorious period of daytime.", l2: "Major launches, key purchases.", l3: "Southward travel.", l4: "Destroys all negative doshas." },
+    { name: "9. सतमुखी (Sutamukhi)", nature: "Auspicious", badge: "badge-auspicious", deity: "विश्वकर्मा", act1: "Art Craft", act2: "Creative Coding", act3: "Design Plans", act4: "Enjoy Music", l1: "Creative vibration ruled by Vishwakarma.", l2: "Designing, coding, art.", l3: "Monotonous administrative work.", l4: "Fosters creative flow." },
+    { name: "10. पुरुहूत (Puruhuta)", nature: "Auspicious", badge: "badge-auspicious", deity: "इन्द्र देव", act1: "Eat Lunch", act2: "Power Lunch", act3: "Balanced Meal", act4: "Light Food", l1: "Empowered energy associated with nourishment.", l2: "Meals, executive decisions.", l3: "Extreme fasting.", l4: "Indra's strength maintains vitality." },
+    { name: "11. वाहिन (Vahini)", nature: "Neutral", badge: "badge-neutral", deity: "अग्नि देव", act1: "Silent Reading", act2: "Routine Tasks", act3: "File Audits", act4: "Short Nap", l1: "Transformative fire element.", l2: "Data filing, routine execution.", l3: "Impulsive financial risks.", l4: "Fire energy requires composure." },
+    { name: "12. नक्तंचर (Naktanakara)", nature: "Inauspicious", badge: "badge-inauspicious", deity: "राक्षस / नैरृत", act1: "Avoid Fights", act2: "Pause Deals", act3: "Avoid Arguments", act4: "Stay Hydrated", l1: "Shadow period where clarity drops.", l2: "Hydration, light review.", l3: "Important negotiations.", l4: "Restless energy causes confusion." },
+    { name: "13. वरुण (Varuna)", nature: "Auspicious", badge: "badge-auspicious", deity: "वरुण देव", act1: "Outdoor Sports", act2: "Network Events", act3: "Travel Work", act4: "Evening Walk", l1: "Fluid water deity energy.", l2: "Travel, relationship building.", l3: "Stagnant work, lingering conflict.", l4: "Clears impurities." },
+    { name: "14. अर्यमा (Aryama)", nature: "Auspicious", badge: "badge-auspicious", deity: "अर्यमा", act1: "Play Games", act2: "Build Relationships", act3: "Family Time", act4: "Bless Youth", l1: "Warm social energy supporting family bonds.", l2: "Family bonding, mentorship.", l3: "Harsh business cuts.", l4: "Governs social harmony." },
+    { name: "15. भग (Bhaga)", nature: "Auspicious", badge: "badge-auspicious", deity: "भग (आदित्य देव)", act1: "Hobby Time", act2: "Wrap Work", act3: "Home Returns", act4: "Evening Aarti", l1: "Sunset transition bringer of luck.", l2: "Wrapping tasks, evening prayers.", l3: "Starting fresh long-term projects.", l4: "Prepares mind for twilight." }
 ];
 
 // 15 Nighttime Muhurtas
 const nighttimeMuhurtas = [
-    { name: "16. गिरीश (Girisha)", nature: "Auspicious", badge: "badge-auspicious", deity: "शिव (गिरीश)", act1: "Evening Prayer", act2: "Family Dinner", act3: "Reflect Day", act4: "Early Rest", l1: "Peaceful twilight energy dedicated to Lord Shiva.", l2: "Evening Aarti, family dinner, daily reflection.", l3: "Heated debates, night shifts if avoidable.", l4: "Quiet stillness of dusk brings mental calmness." },
-    { name: "17. अजपाद (Ajapada)", nature: "Auspicious", badge: "badge-auspicious", deity: "अज एकपाद", act1: "Read Stories", act2: "Planning Tomorrow", act3: "Spiritual Reading", act4: "Peaceful Music", l1: "Mystical night energy aiding deeper thought.", l2: "Planning for the next day, spiritual reading, light music.", l3: "Heavy physical labor or high strain.", l4: "Steady one-footed stability in mental focus." },
-    { name: "18. अहिर्बुध्न्य (Ahirbudhnya)", nature: "Auspicious", badge: "badge-auspicious", deity: "अहिर्बुध्न्य", act1: "Light Reading", act2: "Meditation Practice", act3: "Relaxation Walk", act4: "Quiet Prayer", l1: "Deep subterranean energy supporting Kundalini and rest.", l2: "Meditation, relaxation, night prayers.", l3: "Loud gatherings, intense stimulation.", l4: "Protective cosmic serpent safeguards resting minds." },
-    { name: "19. पुष्य (Pushya)", nature: "Auspicious", badge: "badge-auspicious", deity: "बृहस्पति", act1: "Bedtime Routine", act2: "Journal Thoughts", act3: "Gratitude Meditation", act4: "Night Prayers", l1: "Nourishing energy governed by Jupiter.", l2: "Journaling, bedtime gratitude, peaceful rest preparation.", l3: "Negative thoughts, arguments.", l4: "Nourishes soul and body with restorative vibrations." },
-    { name: "20. अश्विनी (Ashwini)", nature: "Auspicious", badge: "badge-auspicious", deity: "अश्विनी कुमार", act1: "Deep Sleep", act2: "Deep Sleep", act3: "Deep Sleep", act4: "Deep Sleep", l1: "Healing energy of celestial physicians.", l2: "Restful sleep, body rejuvenation.", l3: "Staying awake unnecessarily.", l4: "Promotes cell repair and rapid healing in sleep." },
-    { name: "21. यम (Yama)", nature: "Inauspicious", badge: "badge-inauspicious", deity: "यमराज", act1: "Rest Well", act2: "Rest Well", act3: "Rest Well", act4: "Rest Well", l1: "Restricted midnight energy of restraint.", l2: "Undisturbed sleep and mental detachment.", l3: "Night travel, waking activities.", l4: "Time reserved purely for physical dormancy." },
-    { name: "22. अग्नि (Agni)", nature: "Auspicious", badge: "badge-auspicious", deity: "अग्नि देव", act1: "Rest Well", act2: "Rest Well", act3: "Rest Well", act4: "Rest Well", l1: "Internal metabolic fire processing daily nourishment.", l2: "Deep peaceful slumber.", l3: "Late night eating or heavy drinking.", l4: "Digestive fire purifies the internal system during rest." },
-    { name: "23. विधाता (Vidhata)", nature: "Auspicious", badge: "badge-auspicious", deity: "विधाता / विधि", act1: "Rest Well", act2: "Rest Well", act3: "Rest Well", act4: "Rest Well", l1: "Destiny shaping quiet midnight period.", l2: "Sound sleep, subconscious consolidation.", l3: "Overthinking, anxiety.", l4: "Subconscious mind aligns with cosmic cosmic rhythm." },
-    { name: "24. कण्ड (Kanda)", nature: "Neutral", badge: "badge-neutral", deity: "चन्द्र देव (सोम)", act1: "Rest Well", act2: "Rest Well", act3: "Rest Well", act4: "Rest Well", l1: "Cool lunar energy regulating fluids and peace.", l2: "Restful sleep.", l3: "Exposure to harsh lights or screens.", l4: "Soma energy restores emotional equilibrium." },
-    { name: "25. अदिति (Aditi)", nature: "Auspicious", badge: "badge-auspicious", deity: "अदिति", act1: "Rest Well", act2: "Rest Well", act3: "Rest Well", act4: "Rest Well", l1: "Boundless motherly protective energy.", l2: "Uninterrupted sleep, peaceful dreams.", l3: "Stressful awakenings.", l4: "Provides cosmic security and warmth." },
-    { name: "26. अमृत / जीव (Amrita)", nature: "Very Auspicious", badge: "badge-very-auspicious", deity: "धन्वन्तरि", act1: "Sweet Dreams", act2: "Deep Meditation", act3: "Deep Meditation", act4: "Early Awakening", l1: "Nectarine spiritual energy pre-dawn.", l2: "Meditation, deep spiritual reflection, healing.", l3: "Slothfulness, toxic thoughts.", l4: "Infuses life force and longevity into the subtle body." },
-    { name: "27. विष्णु (Vishnu)", nature: "Auspicious", badge: "badge-auspicious", deity: "भगवान् विष्णु", act1: "Quiet Rest", act2: "Brahma Muhurta", act3: "Brahma Muhurta", act4: "Spiritual Study", l1: "Sustaining divine energy near dawn.", l2: "Early awakening, chanting, spiritual study.", l3: "Over-sleeping, lethargy.", l4: "Protects and sustains clarity of mind." },
-    { name: "28. द्युमद्गद्युति (Dyumadgadyuti)", nature: "Auspicious", badge: "badge-auspicious", deity: "सूर्य", act1: "Early Awake", act2: "Morning Yoga", act3: "Morning Prayers", act4: "Gentle Stretch", l1: "First pre-dawn rays of solar awakening.", l2: "Yoga, pranayama, morning walks.", l3: "Staying in bed late.", l4: "Ignites bodily vitality for the coming day." },
-    { name: "29. ब्रह्म (Brahma)", nature: "Spiritual", badge: "badge-auspicious", deity: "ब्रह्मदेव", act1: "Study / Prayer", act2: "Meditation / Yoga", act3: "Chanting / Japa", act4: "Holy Thoughts", l1: "Sacred Brahma Muhurta ideal for high spiritual pursuits.", l2: "Meditation, mantra chanting, intense study.", l3: "Sleeping, eating heavy food.", l4: "Intellect and memory capacity are highest now." },
-    { name: "30. समुद्र (Samudra)", nature: "Auspicious", badge: "badge-auspicious", deity: "समुद्र देव", act1: "Prepare School", act2: "Morning Walk", act3: "Sunrise Worship", act4: "Morning Prayer", l1: "Vast oceanic energy prior to sunrise.", l2: "Bathing, sunrise salutations, day preparation.", l3: "Arguments or mental laziness.", l4: "Cleanses auric energy for a new day." }
+    { name: "16. गिरीश (Girisha)", nature: "Auspicious", badge: "badge-auspicious", deity: "शिव (गिरीश)", act1: "Evening Prayer", act2: "Family Dinner", act3: "Reflect Day", act4: "Early Rest", l1: "Peaceful twilight energy.", l2: "Evening Aarti, family dinner.", l3: "Heated debates.", l4: "Stillness brings mental calmness." },
+    { name: "17. अजपाद (Ajapada)", nature: "Auspicious", badge: "badge-auspicious", deity: "अज एकपाद", act1: "Read Stories", act2: "Planning Tomorrow", act3: "Spiritual Reading", act4: "Peaceful Music", l1: "Mystical night energy.", l2: "Planning, spiritual reading.", l3: "Heavy physical labor.", l4: "Steady focus." },
+    { name: "18. अहिर्बुध्न्य (Ahirbudhnya)", nature: "Auspicious", badge: "badge-auspicious", deity: "अहिर्बुध्न्य", act1: "Light Reading", act2: "Meditation Practice", act3: "Relaxation Walk", act4: "Quiet Prayer", l1: "Deep energy supporting rest.", l2: "Meditation, relaxation.", l3: "Loud gatherings.", l4: "Protects resting minds." },
+    { name: "19. पुष्य (Pushya)", nature: "Auspicious", badge: "badge-auspicious", deity: "बृहस्पति", act1: "Bedtime Routine", act2: "Journal Thoughts", act3: "Gratitude Meditation", act4: "Night Prayers", l1: "Nourishing energy by Jupiter.", l2: "Bedtime gratitude, rest.", l3: "Negative thoughts.", l4: "Restores subtle body." },
+    { name: "20. अश्विनी (Ashwini)", nature: "Auspicious", badge: "badge-auspicious", deity: "अश्विनी कुमार", act1: "Deep Sleep", act2: "Deep Sleep", act3: "Deep Sleep", act4: "Deep Sleep", l1: "Healing energy of celestial physicians.", l2: "Restful sleep.", l3: "Staying awake.", l4: "Promotes cellular repair." },
+    { name: "21. यम (Yama)", nature: "Inauspicious", badge: "badge-inauspicious", deity: "यमराज", act1: "Rest Well", act2: "Rest Well", act3: "Rest Well", act4: "Rest Well", l1: "Midnight restraint energy.", l2: "Undisturbed sleep.", l3: "Night travel.", l4: "Time for physical dormancy." },
+    { name: "22. अग्नि (Agni)", nature: "Auspicious", badge: "badge-auspicious", deity: "अग्नि देव", act1: "Rest Well", act2: "Rest Well", act3: "Rest Well", act4: "Rest Well", l1: "Internal metabolic fire.", l2: "Peaceful slumber.", l3: "Late night eating.", l4: "Purifies internal system." },
+    { name: "23. विधाता (Vidhata)", nature: "Auspicious", badge: "badge-auspicious", deity: "विधाता / विधि", act1: "Rest Well", act2: "Rest Well", act3: "Rest Well", act4: "Rest Well", l1: "Destiny shaping quiet period.", l2: "Sound sleep.", l3: "Anxiety.", l4: "Subconscious aligns with cosmos." },
+    { name: "24. कण्ड (Kanda)", nature: "Neutral", badge: "badge-neutral", deity: "चन्द्र देव (सोम)", act1: "Rest Well", act2: "Rest Well", act3: "Rest Well", act4: "Rest Well", l1: "Cool lunar energy.", l2: "Restful sleep.", l3: "Screen light.", l4: "Restores emotional balance." },
+    { name: "25. अदिति (Aditi)", nature: "Auspicious", badge: "badge-auspicious", deity: "अदिति", act1: "Rest Well", act2: "Rest Well", act3: "Rest Well", act4: "Rest Well", l1: "Motherly protective energy.", l2: "Uninterrupted sleep.", l3: "Stressful awakenings.", l4: "Provides security." },
+    { name: "26. अमृत / जीव (Amrita)", nature: "Very Auspicious", badge: "badge-very-auspicious", deity: "धन्वन्तरि", act1: "Sweet Dreams", act2: "Deep Meditation", act3: "Deep Meditation", act4: "Early Awakening", l1: "Nectarine spiritual energy.", l2: "Meditation, deep reflection.", l3: "Slothfulness.", l4: "Infuses life force." },
+    { name: "27. विष्णु (Vishnu)", nature: "Auspicious", badge: "badge-auspicious", deity: "भगवान् विष्णु", act1: "Quiet Rest", act2: "Brahma Muhurta", act3: "Brahma Muhurta", act4: "Spiritual Study", l1: "Sustaining divine energy.", l2: "Early awakening, chanting.", l3: "Over-sleeping.", l4: "Sustains mental clarity." },
+    { name: "28. द्युमद्गद्युति (Dyumadgadyuti)", nature: "Auspicious", badge: "badge-auspicious", deity: "सूर्य", act1: "Early Awake", act2: "Morning Yoga", act3: "Morning Prayers", act4: "Gentle Stretch", l1: "Pre-dawn rays of solar awakening.", l2: "Yoga, pranayama.", l3: "Staying in bed late.", l4: "Ignites bodily vitality." },
+    { name: "29. ब्रह्म (Brahma)", nature: "Spiritual", badge: "badge-auspicious", deity: "ब्रह्मदेव", act1: "Study / Prayer", act2: "Meditation / Yoga", act3: "Chanting / Japa", act4: "Holy Thoughts", l1: "Sacred Brahma Muhurta.", l2: "Meditation, mantra chanting.", l3: "Heavy food.", l4: "Highest intellect capacity." },
+    { name: "30. समुद्र (Samudra)", nature: "Auspicious", badge: "badge-auspicious", deity: "समुद्र देव", act1: "Prepare School", act2: "Morning Walk", act3: "Sunrise Worship", act4: "Morning Prayer", l1: "Oceanic energy prior to sunrise.", l2: "Bathing, day preparation.", l3: "Arguments.", l4: "Cleanses auric energy." }
 ];
 
-// Lock Screen Unlock Mechanism
+// Lock Screen Unlock
 function unlockWatch() {
     const val = document.getElementById('passcode-input').value.trim().toLowerCase();
     const words = val.split(/\s+/);
@@ -702,24 +783,27 @@ function unlockWatch() {
     }
 }
 
-// Dynamic QR Code Generator & UPI Deep Link Handler
+// Payment QR Code Generator
 function updateQRAmount(amount) {
     const amt = parseFloat(amount);
     let upiURI = `upi://pay?pa=${upiID}&pn=VedicWatchSupport&cu=INR&tn=Support%20Vedic%20Watch`;
     if (!isNaN(amt) && amt > 0) {
         upiURI += `&am=${amt.toFixed(2)}`;
     }
-    
-    // Updates direct mobile app trigger URL
     document.getElementById('upi-direct-link').href = upiURI;
-
-    // Encodes UPI string into QR Code API for desktop viewers
     const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(upiURI)}`;
     document.getElementById('upi-qr-image').src = qrApiUrl;
 }
 
+// Get Local Time for selected Time Zone Offset
+function getTargetGeoTime(tzOffsetHours) {
+    const localNow = new Date();
+    const utcMs = localNow.getTime() + (localNow.getTimezoneOffset() * 60000);
+    return new Date(utcMs + (3600000 * tzOffsetHours));
+}
+
 // Solar Calculation Algorithm
-function calculateSunriseSunset(date, lat, lon) {
+function calculateSunriseSunset(date, lat, lon, tzOffset) {
     const dayOfYear = Math.floor((date - new Date(date.getFullYear(), 0, 0)) / 1000 / 60 / 60 / 24);
     const declination = 23.45 * Math.sin((2 * Math.PI / 365) * (dayOfYear - 81));
     
@@ -742,15 +826,43 @@ function calculateSunriseSunset(date, lat, lon) {
     const sunriseMinutes = solarNoonMinutes - (ha * 4);
     const sunsetMinutes = solarNoonMinutes + (ha * 4);
     
-    const tzOffsetMinutes = -date.getTimezoneOffset();
-    const srMs = (sunriseMinutes + tzOffsetMinutes) * 60 * 1000;
-    const ssMs = (sunsetMinutes + tzOffsetMinutes) * 60 * 1000;
+    const srMs = (sunriseMinutes + (tzOffset * 60)) * 60 * 1000;
+    const ssMs = (sunsetMinutes + (tzOffset * 60)) * 60 * 1000;
     
     const baseDateMs = new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime();
     
     return {
         sunrise: new Date(baseDateMs + srMs),
         sunset: new Date(baseDateMs + ssMs)
+    };
+}
+
+// Approximate Tithi Panchang Algorithm
+function calculateTithiPanchang(date) {
+    const knownNewMoon = new Date('2024-01-11T11:57:00Z');
+    const synodicMonthDays = 29.53058770576;
+    
+    const diffDays = (date.getTime() - knownNewMoon.getTime()) / (1000 * 60 * 60 * 24);
+    const cycleProgress = (diffDays % synodicMonthDays + synodicMonthDays) % synodicMonthDays;
+    
+    const lunarAgeDegrees = (cycleProgress / synodicMonthDays) * 360;
+    const tithiIndex = Math.floor(lunarAgeDegrees / 12) % 30;
+    
+    const isSukla = tithiIndex < 15;
+    const pakshaName = isSukla ? "Shukla Paksha (शुक्ल पक्ष)" : "Krishna Paksha (कृष्ण पक्ष)";
+    const rawTithi = tithiDetails[tithiIndex % 15];
+    const tithiNumber = (tithiIndex % 15) + 1;
+    
+    const percentInTithi = ((lunarAgeDegrees % 12) / 12) * 100;
+
+    return {
+        tithiName: `${tithiNumber}. ${rawTithi.name}`,
+        paksha: pakshaName,
+        deity: rawTithi.deity,
+        nature: rawTithi.nature,
+        favorable: rawTithi.fav,
+        unfavorable: rawTithi.unfav,
+        progress: percentInTithi.toFixed(1)
     };
 }
 
@@ -762,6 +874,8 @@ function handleCityChange() {
         document.getElementById('custom-coords').style.display = 'none';
         currentLat = presetCities[val].lat;
         currentLon = presetCities[val].lon;
+        currentTz = presetCities[val].tz;
+        document.getElementById('loc-name-tag').innerText = presetCities[val].name;
         updateVedicClock();
     }
 }
@@ -769,9 +883,12 @@ function handleCityChange() {
 function applyCustomCoords() {
     const latVal = parseFloat(document.getElementById('lat').value);
     const lonVal = parseFloat(document.getElementById('lon').value);
-    if (!isNaN(latVal) && !isNaN(lonVal)) {
+    const tzVal = parseFloat(document.getElementById('tz-offset').value);
+    if (!isNaN(latVal) && !isNaN(lonVal) && !isNaN(tzVal)) {
         currentLat = latVal;
         currentLon = lonVal;
+        currentTz = tzVal;
+        document.getElementById('loc-name-tag').innerText = `Custom (${latVal.toFixed(2)}, ${lonVal.toFixed(2)})`;
         updateVedicClock();
     }
 }
@@ -798,7 +915,7 @@ function setMuhurtaTab(offset) {
 }
 
 function getMuhurtaDetails(now, offsetIndex) {
-    const sunTimes = calculateSunriseSunset(now, currentLat, currentLon);
+    const sunTimes = calculateSunriseSunset(now, currentLat, currentLon, currentTz);
     let sunrise = sunTimes.sunrise;
     let sunset = sunTimes.sunset;
 
@@ -855,22 +972,30 @@ function getMuhurtaDetails(now, offsetIndex) {
 }
 
 function updateVedicClock() {
-    const now = new Date();
+    const geoNow = getTargetGeoTime(currentTz);
     
-    document.getElementById('clock').innerText = formatTime(now);
-    document.getElementById('date-str').innerText = now.toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+    document.getElementById('clock').innerText = formatTime(geoNow);
+    document.getElementById('date-str').innerText = geoNow.toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
-    const details = getMuhurtaDetails(now, activeTabOffset);
+    // Panchang Tithi
+    const tithi = calculateTithiPanchang(geoNow);
+    cachedTithiData = tithi;
+    document.getElementById('tithi-name').innerText = tithi.tithiName;
+    document.getElementById('tithi-paksha').innerText = tithi.paksha;
+    document.getElementById('tithi-progress').innerText = `Lunar Elapsed: ${tithi.progress}%`;
+
+    // Muhurta Calculation
+    const details = getMuhurtaDetails(geoNow, activeTabOffset);
     
     document.getElementById('sunrise-time').innerText = formatShortTime(details.sunrise);
     document.getElementById('sunset-time').innerText = formatShortTime(details.sunset);
 
     // Calculate Ghati, Pal, Vipal baseline
     let dayStart = new Date(details.sunrise);
-    if (now < details.sunrise) {
+    if (geoNow < details.sunrise) {
         dayStart.setDate(dayStart.getDate() - 1);
     }
-    const totalSecs = (now - dayStart) / 1000;
+    const totalSecs = Math.max(0, (geoNow - dayStart) / 1000);
     const ghati = Math.floor(totalSecs / 1440);
     const rem1 = totalSecs % 1440;
     const pal = Math.floor(rem1 / 24);
@@ -914,8 +1039,22 @@ function closeInterpretationModal() {
     document.getElementById('interp-modal').style.display = 'none';
 }
 
+function openTithiModal() {
+    if (!cachedTithiData) return;
+    document.getElementById('tithi-modal-title').innerText = "Panchang: " + cachedTithiData.tithiName;
+    document.getElementById('tithi-l1').innerText = cachedTithiData.deity;
+    document.getElementById('tithi-l2').innerText = cachedTithiData.nature + " (" + cachedTithiData.paksha + ")";
+    document.getElementById('tithi-l3').innerText = cachedTithiData.favorable;
+    document.getElementById('tithi-l4').innerText = cachedTithiData.unfavorable;
+    document.getElementById('tithi-modal').style.display = 'flex';
+}
+
+function closeTithiModal() {
+    document.getElementById('tithi-modal').style.display = 'none';
+}
+
 function openPaymentModal() {
-    updateQRAmount(108); // Default to ₹108
+    updateQRAmount(108);
     document.getElementById('payment-modal').style.display = 'flex';
 }
 
@@ -923,7 +1062,7 @@ function closePaymentModal() {
     document.getElementById('payment-modal').style.display = 'none';
 }
 
-// Initial Call and Interval Loop
+// Initial Call and Loop
 setInterval(updateVedicClock, 400);
 updateVedicClock();
 </script>
