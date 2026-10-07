@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Universal Dynamic Vedic Clock, Tithi Panchang & Age-Wise Guide</title>
+    <title>Universal Dynamic Vedic Clock, Tithi Panchang & Daily Planner</title>
+    <!-- html2pdf.js for generating true downloadable vector/editable PDFs -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
 
@@ -45,24 +47,9 @@
             width: 90%;
         }
 
-        .lock-icon {
-            font-size: 3rem;
-            margin-bottom: 10px;
-        }
-
-        .lock-title {
-            color: #fbbf24;
-            font-size: 1.3rem;
-            font-weight: 700;
-            margin-bottom: 8px;
-        }
-
-        .lock-desc {
-            color: #94a3b8;
-            font-size: 0.85rem;
-            margin-bottom: 20px;
-            line-height: 1.4;
-        }
+        .lock-icon { font-size: 3rem; margin-bottom: 10px; }
+        .lock-title { color: #fbbf24; font-size: 1.3rem; font-weight: 700; margin-bottom: 8px; }
+        .lock-desc { color: #94a3b8; font-size: 0.85rem; margin-bottom: 20px; line-height: 1.4; }
 
         .lock-input {
             width: 100%;
@@ -90,12 +77,26 @@
 
         .lock-btn:hover { background: #0369a1; }
 
-        .error-msg {
-            color: #f87171;
-            font-size: 0.78rem;
-            margin-top: 8px;
-            display: none;
+        .manual-trigger-btn {
+            background: transparent;
+            border: 1px solid #fbbf24;
+            color: #fbbf24;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 12px;
+            width: 100%;
+            transition: all 0.2s;
         }
+
+        .manual-trigger-btn:hover {
+            background: #fbbf24;
+            color: #0f172a;
+        }
+
+        .error-msg { color: #f87171; font-size: 0.78rem; margin-top: 8px; display: none; }
 
         /* Clock Card */
         .clock-card {
@@ -107,7 +108,7 @@
             text-align: center;
             max-width: 520px;
             width: 100%;
-            display: none; /* Hidden until unlocked */
+            display: none;
         }
 
         .header-title {
@@ -118,13 +119,8 @@
             letter-spacing: 1px;
         }
 
-        .sub-title {
-            color: #94a3b8;
-            font-size: 0.8rem;
-            margin-bottom: 15px;
-        }
+        .sub-title { color: #94a3b8; font-size: 0.8rem; margin-bottom: 15px; }
 
-        /* Location Selection Controls */
         .location-box {
             background: #0f172a;
             padding: 12px;
@@ -133,12 +129,7 @@
             border: 1px solid #334155;
         }
 
-        .form-group {
-            display: flex;
-            gap: 8px;
-            margin-top: 8px;
-            justify-content: center;
-        }
+        .form-group { display: flex; gap: 8px; margin-top: 8px; justify-content: center; }
 
         select, input, button {
             padding: 6px 10px;
@@ -150,15 +141,7 @@
             font-size: 0.82rem;
         }
 
-        button {
-            background: #0284c7;
-            color: white;
-            font-weight: 600;
-            cursor: pointer;
-            border: none;
-            transition: background 0.2s;
-        }
-
+        button { background: #0284c7; color: white; font-weight: 600; cursor: pointer; border: none; transition: background 0.2s; }
         button:hover { background: #0369a1; }
 
         .time-display {
@@ -169,18 +152,8 @@
             margin: 5px 0;
         }
 
-        .location-tz-tag {
-            font-size: 0.78rem;
-            color: #38bdf8;
-            font-weight: 600;
-            margin-bottom: 2px;
-        }
-
-        .date-display {
-            color: #94a3b8;
-            font-size: 0.85rem;
-            margin-bottom: 12px;
-        }
+        .location-tz-tag { font-size: 0.78rem; color: #38bdf8; font-weight: 600; margin-bottom: 2px; }
+        .date-display { color: #94a3b8; font-size: 0.85rem; margin-bottom: 12px; }
 
         .sun-times {
             display: flex;
@@ -193,7 +166,24 @@
             margin-bottom: 15px;
         }
 
-        /* Tithi Box */
+        .action-nav { display: flex; gap: 10px; margin-bottom: 15px; }
+
+        .nav-planner-btn {
+            flex: 1;
+            padding: 10px;
+            background: linear-gradient(135deg, #0284c7, #0369a1);
+            color: #ffffff;
+            font-weight: 700;
+            font-size: 0.88rem;
+            border-radius: 10px;
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 4px 12px rgba(2, 132, 199, 0.3);
+            transition: all 0.2s;
+        }
+
+        .nav-planner-btn:hover { background: linear-gradient(135deg, #0369a1, #075985); }
+
         .tithi-box {
             background: #0f172a;
             border: 1px solid #334155;
@@ -203,30 +193,11 @@
             text-align: left;
         }
 
-        .tithi-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
+        .tithi-header { display: flex; justify-content: space-between; align-items: center; }
+        .tithi-title { color: #e2e8f0; font-weight: 700; font-size: 0.95rem; }
+        .tithi-sub { color: #94a3b8; font-size: 0.78rem; margin-top: 2px; }
 
-        .tithi-title {
-            color: #e2e8f0;
-            font-weight: 700;
-            font-size: 0.95rem;
-        }
-
-        .tithi-sub {
-            color: #94a3b8;
-            font-size: 0.78rem;
-            margin-top: 2px;
-        }
-
-        /* Navigation Tab Buttons for Muhurtas */
-        .muhurta-nav {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 10px;
-        }
+        .muhurta-nav { display: flex; gap: 8px; margin-bottom: 10px; }
 
         .tab-btn {
             flex: 1;
@@ -241,13 +212,8 @@
             transition: all 0.2s;
         }
 
-        .tab-btn.active {
-            background: #0284c7;
-            color: white;
-            border-color: #38bdf8;
-        }
+        .tab-btn.active { background: #0284c7; color: white; border-color: #38bdf8; }
 
-        /* Current Muhurta Display */
         .muhurta-box {
             background: #0f172a;
             border-radius: 12px;
@@ -257,23 +223,9 @@
             margin-bottom: 15px;
         }
 
-        .muhurta-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .muhurta-title {
-            font-size: 1.3rem;
-            color: #fbbf24;
-            font-weight: 700;
-        }
-
-        .muhurta-meta {
-            font-size: 0.85rem;
-            color: #cbd5e1;
-            margin-top: 4px;
-        }
+        .muhurta-header { display: flex; justify-content: space-between; align-items: center; }
+        .muhurta-title { font-size: 1.3rem; color: #fbbf24; font-weight: 700; }
+        .muhurta-meta { font-size: 0.85rem; color: #cbd5e1; margin-top: 4px; }
 
         .interp-link {
             display: inline-block;
@@ -285,21 +237,12 @@
             font-weight: 500;
         }
 
-        .interp-link:hover { color: #7dd3fc; }
-
-        .badge {
-            padding: 3px 10px;
-            border-radius: 20px;
-            font-weight: 600;
-            font-size: 0.75rem;
-        }
-
+        .badge { padding: 3px 10px; border-radius: 20px; font-weight: 600; font-size: 0.75rem; }
         .badge-auspicious { background: #059669; color: #ecfdf5; }
         .badge-very-auspicious { background: #10b981; color: #ffffff; font-weight: 700; }
         .badge-inauspicious { background: #dc2626; color: #fef2f2; }
         .badge-neutral { background: #64748b; color: #f8fafc; }
 
-        /* Age Wise Suggestions Grid */
         .agewise-card {
             background: #1e293b;
             border: 1px solid #334155;
@@ -308,69 +251,17 @@
             margin-top: 10px;
         }
 
-        .agewise-title {
-            font-size: 0.75rem;
-            color: #38bdf8;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 8px;
-            font-weight: 600;
-        }
+        .agewise-title { font-size: 0.75rem; color: #38bdf8; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; font-weight: 600; }
+        .agewise-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; text-align: left; }
+        .age-item { background: #0f172a; padding: 6px 8px; border-radius: 6px; border-left: 3px solid #38bdf8; }
+        .age-label { font-size: 0.68rem; color: #94a3b8; font-weight: 600; }
+        .age-action { font-size: 0.85rem; color: #f8fafc; font-weight: 700; }
 
-        .agewise-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 8px;
-            text-align: left;
-        }
+        .units-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 15px; }
+        .unit-item { background: #334155; padding: 8px; border-radius: 8px; }
+        .unit-val { font-size: 1.2rem; font-weight: 700; color: #38bdf8; font-family: monospace; }
+        .unit-lbl { font-size: 0.68rem; color: #94a3b8; text-transform: uppercase; }
 
-        .age-item {
-            background: #0f172a;
-            padding: 6px 8px;
-            border-radius: 6px;
-            border-left: 3px solid #38bdf8;
-        }
-
-        .age-label {
-            font-size: 0.68rem;
-            color: #94a3b8;
-            font-weight: 600;
-        }
-
-        .age-action {
-            font-size: 0.85rem;
-            color: #f8fafc;
-            font-weight: 700;
-        }
-
-        /* Vedic Units Grid */
-        .units-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 8px;
-            margin-top: 15px;
-        }
-
-        .unit-item {
-            background: #334155;
-            padding: 8px;
-            border-radius: 8px;
-        }
-
-        .unit-val {
-            font-size: 1.2rem;
-            font-weight: 700;
-            color: #38bdf8;
-            font-family: monospace;
-        }
-
-        .unit-lbl {
-            font-size: 0.68rem;
-            color: #94a3b8;
-            text-transform: uppercase;
-        }
-
-        /* Support Button */
         .support-btn {
             width: 100%;
             margin-top: 15px;
@@ -386,20 +277,13 @@
             transition: transform 0.2s, background 0.2s;
         }
 
-        .support-btn:hover {
-            transform: translateY(-2px);
-            background: linear-gradient(135deg, #d97706, #b45309);
-        }
-
-        /* Modals */
+        /* Modals Overlay */
         .modal-overlay {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background: rgba(15, 23, 42, 0.85);
-            backdrop-filter: blur(4px);
+            top: 0; left: 0;
+            width: 100vw; height: 100vh;
+            background: rgba(15, 23, 42, 0.88);
+            backdrop-filter: blur(5px);
             display: none;
             justify-content: center;
             align-items: center;
@@ -411,17 +295,18 @@
             border: 2px solid #38bdf8;
             border-radius: 16px;
             padding: 20px;
-            max-width: 440px;
-            width: 90%;
+            max-width: 500px;
+            width: 92%;
             text-align: left;
             position: relative;
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            max-height: 85vh;
+            overflow-y: auto;
         }
 
         .modal-close {
             position: absolute;
-            top: 12px;
-            right: 15px;
+            top: 12px; right: 15px;
             font-size: 1.2rem;
             color: #94a3b8;
             cursor: pointer;
@@ -438,76 +323,205 @@
             padding-bottom: 6px;
         }
 
-        .interp-line {
-            font-size: 0.82rem;
-            color: #cbd5e1;
-            margin-bottom: 8px;
-            line-height: 1.4;
+        .interp-line { font-size: 0.82rem; color: #cbd5e1; margin-bottom: 8px; line-height: 1.4; }
+        .interp-line span { color: #38bdf8; font-weight: 600; }
+
+        /* Full Screen / Responsive Planner Modal Style */
+        .planner-modal-content {
+            max-width: 960px;
+            width: 95%;
+            max-height: 90vh;
+            overflow-y: auto;
         }
 
-        .interp-line span {
-            color: #38bdf8;
+        /* Container target for clean PDF Export */
+        #pdf-export-container {
+            background: #1e293b;
+            padding: 15px;
+            border-radius: 10px;
+        }
+
+        .planner-meta-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .planner-group { display: flex; flex-direction: column; }
+        .planner-group label { font-size: 0.72rem; color: #38bdf8; font-weight: 600; margin-bottom: 4px; }
+
+        .planner-goals-box {
+            background: #0f172a;
+            padding: 12px;
+            border-radius: 10px;
+            border: 1px solid #334155;
+            margin-bottom: 15px;
+        }
+
+        .planner-goals-box h4 { color: #fbbf24; font-size: 0.85rem; margin-bottom: 8px; }
+
+        .planner-table-wrapper { overflow-x: auto; margin-bottom: 15px; }
+
+        .planner-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.8rem;
+        }
+
+        .planner-table th, .planner-table td {
+            border: 1px solid #334155;
+            padding: 8px;
+            text-align: left;
+        }
+
+        .planner-table th { background: #0f172a; color: #38bdf8; font-size: 0.75rem; text-transform: uppercase; }
+
+        .time-slot-cell {
+            color: #fbbf24;
             font-weight: 600;
+            font-family: monospace;
+            font-size: 0.76rem;
+            white-space: nowrap;
         }
 
-        .qr-container {
-            text-align: center;
-            padding: 10px 0;
+        .planner-section-hdr {
+            background: #0f172a;
+            color: #fbbf24;
+            font-weight: 700;
+            text-align: center !important;
+            font-size: 0.85rem;
         }
 
-        .amount-pills {
+        .planner-table input[type="text"] {
+            width: 100%;
+            background: transparent;
+            border: none;
+            color: #f8fafc;
+            font-size: 0.8rem;
+            padding: 4px;
+        }
+
+        .planner-table input[type="text"]:focus {
+            outline: 1px solid #38bdf8;
+            background: #0f172a;
+            border-radius: 4px;
+        }
+
+        .dash-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 10px;
+        }
+
+        .btn-action-row {
             display: flex;
-            gap: 8px;
-            justify-content: center;
-            margin-bottom: 10px;
+            gap: 10px;
+            margin-top: 10px;
         }
 
-        .amt-btn {
+        .download-pdf-btn {
+            background: #059669;
+            color: white;
+            font-weight: 700;
+            padding: 10px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            flex: 1;
+            transition: background 0.2s;
+        }
+
+        .download-pdf-btn:hover { background: #047857; }
+
+        .print-btn {
+            background: #0284c7;
+            color: white;
+            font-weight: 600;
+            padding: 10px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            flex: 1;
+        }
+
+        @media (max-width: 600px) { .dash-grid { grid-template-columns: 1fr; } }
+
+        .qr-container { text-align: center; padding: 10px 0; }
+        .amount-pills { display: flex; gap: 8px; justify-content: center; margin-bottom: 10px; }
+        .amt-btn { background: #0f172a; border: 1px solid #38bdf8; color: #38bdf8; padding: 5px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; cursor: pointer; }
+        .amt-btn.active, .amt-btn:hover { background: #38bdf8; color: #0f172a; }
+        .qr-card-img { width: 180px; height: 180px; border-radius: 12px; background: white; padding: 8px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4); }
+        .upi-trigger-btn { display: block; width: 100%; margin-top: 10px; padding: 10px; background: #10b981; color: #ffffff; font-weight: 700; font-size: 0.9rem; border-radius: 8px; text-align: center; text-decoration: none; cursor: pointer; }
+
+        /* User Manual Styles */
+        .manual-tab-nav {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #334155;
+            padding-bottom: 10px;
+        }
+
+        .manual-tab-btn {
+            flex: 1;
+            padding: 8px;
             background: #0f172a;
             border: 1px solid #38bdf8;
             color: #38bdf8;
-            padding: 5px 12px;
-            border-radius: 20px;
-            font-size: 0.8rem;
             font-weight: 600;
+            border-radius: 8px;
             cursor: pointer;
-            transition: all 0.2s;
         }
 
-        .amt-btn.active, .amt-btn:hover {
+        .manual-tab-btn.active {
             background: #38bdf8;
             color: #0f172a;
         }
 
-        .qr-card-img {
-            width: 180px;
-            height: 180px;
-            border-radius: 12px;
-            background: white;
-            padding: 8px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+        .manual-sec {
+            display: none;
+            font-size: 0.85rem;
+            line-height: 1.5;
+            color: #cbd5e1;
         }
 
-        .upi-trigger-btn {
-            display: block;
-            width: 100%;
-            margin-top: 10px;
-            padding: 10px;
-            background: #10b981;
-            color: #ffffff;
-            font-weight: 700;
-            font-size: 0.9rem;
-            border-radius: 8px;
-            text-align: center;
-            text-decoration: none;
-            border: none;
-            cursor: pointer;
-            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        .manual-sec.active { display: block; }
+
+        .manual-sec h3 {
+            color: #fbbf24;
+            font-size: 0.95rem;
+            margin: 12px 0 6px 0;
         }
 
-        .upi-trigger-btn:hover {
-            background: #059669;
+        .manual-sec ul {
+            padding-left: 20px;
+            margin-bottom: 10px;
         }
+
+        .manual-sec li { margin-bottom: 4px; }
+
+        /* Clean Styling for Exported PDF document */
+        .pdf-export-mode {
+            background: #ffffff !important;
+            color: #000000 !important;
+            padding: 20px !important;
+        }
+        .pdf-export-mode input[type="text"], .pdf-export-mode input[type="date"] {
+            color: #000000 !important;
+            background: transparent !important;
+            border-bottom: 1px solid #999 !important;
+        }
+        .pdf-export-mode .planner-goals-box, 
+        .pdf-export-mode .planner-table th, 
+        .pdf-export-mode .planner-table td {
+            background: #ffffff !important;
+            color: #000000 !important;
+            border: 1px solid #444 !important;
+        }
+        .pdf-export-mode .time-slot-cell { color: #000000 !important; font-weight: bold; }
+        .pdf-export-mode .modal-title, .pdf-export-mode h4, .pdf-export-mode label { color: #000000 !important; }
     </style>
 </head>
 <body>
@@ -520,6 +534,7 @@
         <div class="lock-desc">Write <b>sitaram</b> 5 times in the space below to open this Vedic Watch.</div>
         <input type="text" id="passcode-input" class="lock-input" placeholder="Enter sitaram 5 times...">
         <button class="lock-btn" onclick="unlockWatch()">Unlock Watch</button>
+        <button class="manual-trigger-btn" onclick="openManualModal()">📖 User Manual / उपयोगकर्ता मार्गदर्शिका</button>
         <div id="lock-error" class="error-msg">Please write "sitaram" 5 times separated by spaces.</div>
     </div>
 </div>
@@ -529,7 +544,6 @@
     <div class="header-title">Universal Vedic Clock</div>
     <div class="sub-title">Real-Time Astronomical Calculations & Age-Wise Guide</div>
 
-    <!-- Location Selector -->
     <div class="location-box">
         <label style="font-size: 0.8rem; color: #cbd5e1; font-weight: 600;">Select Location:</label>
         <div class="form-group">
@@ -552,15 +566,19 @@
         </div>
     </div>
 
-    <!-- Clock Display -->
     <div class="location-tz-tag" id="loc-name-tag">Deoria, India</div>
     <div class="time-display" id="clock">00:00:00 AM</div>
     <div class="date-display" id="date-str">Loading Date...</div>
 
-    <!-- Solar Baseline -->
     <div class="sun-times">
         <div>🌅 Sunrise: <span id="sunrise-time" style="color:#fbbf24; font-weight:600;">--:--</span></div>
         <div>🌇 Sunset: <span id="sunset-time" style="color:#f97316; font-weight:600;">--:--</span></div>
+    </div>
+
+    <!-- Action Navigation Bar -->
+    <div class="action-nav">
+        <button class="nav-planner-btn" onclick="openPlannerModal()">📋 Open 30-Muhūrta Daily Planner</button>
+        <button class="manual-trigger-btn" style="margin-top:0; width:auto;" onclick="openManualModal()">📖 Guide</button>
     </div>
 
     <!-- Daily Tithi Panchang -->
@@ -576,14 +594,13 @@
         </div>
     </div>
 
-    <!-- Muhurta Tabs (Now / Next / Latter) -->
+    <!-- Muhurta Tabs -->
     <div class="muhurta-nav">
         <button class="tab-btn active" id="tab-0" onclick="setMuhurtaTab(0)">NOW (Current)</button>
         <button class="tab-btn" id="tab-1" onclick="setMuhurtaTab(1)">NEXT (Upcoming)</button>
         <button class="tab-btn" id="tab-2" onclick="setMuhurtaTab(2)">LATTER (Next + 1)</button>
     </div>
 
-    <!-- Active Muhurta Box -->
     <div class="muhurta-box">
         <div class="muhurta-header">
             <span style="font-size: 0.72rem; color: #94a3b8; text-transform: uppercase;" id="tab-indicator-label">Current Muhurta</span>
@@ -596,7 +613,6 @@
             <span class="interp-link" onclick="openInterpretationModal()">📖 View Detailed 4-Line Interpretation</span>
         </div>
 
-        <!-- Age Wise Two Word Suggestions -->
         <div class="agewise-card">
             <div class="agewise-title">Age-Wise Action Suggestions</div>
             <div class="agewise-grid">
@@ -620,7 +636,6 @@
         </div>
     </div>
 
-    <!-- Vedic Time Units -->
     <div class="units-grid">
         <div class="unit-item">
             <div class="unit-val" id="ghati">00</div>
@@ -636,35 +651,199 @@
         </div>
     </div>
 
-    <!-- Support Button -->
-    <button class="support-btn" onclick="openPaymentModal()">💖 Want to support this Vedic Watch</button>
+    <button class="support-btn" onclick="openPaymentModal()">💖  support  vedic community/Vedic Watch</button>
 </div>
 
-<!-- Muhurta Interpretation Modal -->
+<!-- Bilingual User Manual Modal -->
+<div class="modal-overlay" id="manual-modal">
+    <div class="modal-content">
+        <button class="modal-close" onclick="closeManualModal()">✕</button>
+        <div class="modal-title">📖 User Manual & Operating Guide</div>
+        
+        <div class="manual-tab-nav">
+            <button class="manual-tab-btn active" id="m-tab-en" onclick="switchManualLang('en')">English</button>
+            <button class="manual-tab-btn" id="m-tab-hi" onclick="switchManualLang('hi')">हिंदी (Hindi)</button>
+        </div>
+
+        <!-- English Section -->
+        <div class="manual-sec active" id="manual-en">
+            <h3>1. Unlocking the Watch</h3>
+            <p>Type <b>sitaram sitaram sitaram sitaram sitaram</b> (the word 'sitaram' 5 times separated by spaces) into the password box and click <i>Unlock Watch</i>.</p>
+
+            <h3>2. Real-Time Astronomical Sync</h3>
+            <ul>
+                <li><b>Location Selection:</b> Choose your city or enter custom Latitude, Longitude, and Timezone offset to get exact local Sunrise and Sunset times.</li>
+                <li><b>Vedic Time Units:</b> View dynamic calculations for Ghati (24 mins), Pal (24 secs), and Vipal (0.4 secs) elapsed since local sunrise.</li>
+            </ul>
+
+            <h3>3. Operating Muhurtas for Max Benefit</h3>
+            <ul>
+                <li><b>NOW, NEXT, LATTER Tabs:</b> Monitor the active Muhurta, incoming energy windows, and age-tailored action recommendations.</li>
+                <li><b>Abhijit Muhurta (8th Day Window):</b> Use this window for high-stakes business decisions, investments, or major project launches.</li>
+                <li><b>Inauspicious Windows:</b> Use periods governed by Rudra, Ahi, or Naktanakara for internal organizing, desk cleanup, and quiet routine work.</li>
+            </ul>
+
+            <h3>4. Using the 30-Muhurta Planner</h3>
+            <ul>
+                <li>Click <b>📋 Open 30-Muhūrta Daily Planner</b> to align your daily tasks across 15 daytime and 15 nighttime cosmic slots.</li>
+                <li>Set your 3 core daily goals and tailor custom goals for each Muhurta slot.</li>
+                <li>Click <b>💾 Save Entries</b> to save locally or <b>📥 Download Editable Planner PDF</b> for vector printable exports.</li>
+            </ul>
+        </div>
+
+        <!-- Hindi Section -->
+        <div class="manual-sec" id="manual-hi">
+            <h3>१. घड़ी को अनलॉक कैसे करें</h3>
+            <p>पासवर्ड बॉक्स में <b>sitaram sitaram sitaram sitaram sitaram</b> (शब्द 'sitaram' को ५ बार स्पेस देकर) लिखें और <i>Unlock Watch</i> पर क्लिक करें।</p>
+
+            <h3>२. खगोलीय और वैदिक समय का उपयोग</h3>
+            <ul>
+                <li><b>स्थान चयन:</b> अपने शहर का चयन करें या कस्टम अक्षांश (Lat) और देशांतर (Lon) दर्ज करें ताकि आपके स्थान के सटीक सूर्योदय और सूर्यास्त की गणना हो सके।</li>
+                <li><b>वैदिक समय इकाइयाँ:</b> सूर्योदय से बीते हुए समय को घटी (२४ मिनट), पल (२४ सेकंड) और विपल (०.४ सेकंड) में वास्तविक समय में देखें।</li>
+            </ul>
+
+            <h3>३. अधिकतम लाभ के लिए मुहूर्त का संचालन</h3>
+            <ul>
+                <li><b>NOW, NEXT, LATTER टैब:</b> वर्तमान मुहूर्त, आने वाले समय और अपनी आयु वर्ग (५-१८, १९-४०, ४१-६०, ६०+) के अनुसार अनुशंसित कार्यों को देखें।</li>
+                <li><b>अभिजित मुहूर्त (८वां दिन का मुहूर्त):</b> महत्वपूर्ण व्यावसायिक निर्णयों, निवेश, या बड़े कार्यों की शुरुआत के लिए इस समय का उपयोग करें।</li>
+                <li><b>अशुभ मुहूर्त खिड़कियाँ:</b> रुद्र, अहिर या नक्तंचर के दौरान नए जोखिम भरे काम से बचें और दिनचर्या की सफाई या अध्ययन करें।</li>
+            </ul>
+
+            <h3>४. ३०-मुहूर्त दैनिक प्लानर का उपयोग</h3>
+            <ul>
+                <li>दिन के १५ और रात्रि के १५ प्राकृतिक समय खंडों में अपने लक्ष्यों को व्यवस्थित करने के लिए <b>📋 Open 30-Muhūrta Daily Planner</b> बटन पर क्लिक करें।</li>
+                <li>अपने दिन के ३ मुख्य लक्ष्य निर्धारित करें और प्रत्येक मुहूर्त खंड में अपने व्यक्तिगत कार्य दर्ज करें।</li>
+                <li><b>💾 Save Entries</b> से डेटा सुरक्षित रखें या <b>📥 Download Editable Planner PDF</b> पर क्लिक करके प्रिंट करने योग्य PDF डाउनलोड करें।</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<!-- 30-Muhurta Planner Modal -->
+<div class="modal-overlay" id="planner-modal">
+    <div class="modal-content planner-modal-content">
+        <button class="modal-close" onclick="closePlannerModal()">✕</button>
+        
+        <!-- Editable Export Container Target -->
+        <div id="pdf-export-container">
+            <div class="modal-title">📅 30-Muhūrta Digital Daily Planner</div>
+            
+            <div class="planner-meta-grid">
+                <div class="planner-group">
+                    <label>Date</label>
+                    <input type="date" id="plan-date">
+                </div>
+                <div class="planner-group">
+                    <label>Day</label>
+                    <input type="text" id="plan-day" placeholder="e.g. Monday">
+                </div>
+                <div class="planner-group">
+                    <label>Sunrise</label>
+                    <input type="text" id="plan-sunrise" readonly style="background:#0f172a; color:#fbbf24;">
+                </div>
+                <div class="planner-group">
+                    <label>Sunset</label>
+                    <input type="text" id="plan-sunset" readonly style="background:#0f172a; color:#f97316;">
+                </div>
+            </div>
+
+            <div class="planner-goals-box">
+                <h4>Today's 3 Big Goals</h4>
+                <input type="text" id="goal-1" placeholder="1. Primary objective" style="width:100%; margin-bottom:6px;">
+                <input type="text" id="goal-2" placeholder="2. Secondary objective" style="width:100%; margin-bottom:6px;">
+                <input type="text" id="goal-3" placeholder="3. Tertiary objective" style="width:100%;">
+            </div>
+
+            <div class="planner-table-wrapper">
+                <table class="planner-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 5%;">#</th>
+                            <th style="width: 18%;">Muhūrta</th>
+                            <th style="width: 22%;">Elapsing Time Slot</th>
+                            <th style="width: 27%;">Tangible Goal</th>
+                            <th style="width: 28%;">My Tailor-Made Goal</th>
+                        </tr>
+                    </thead>
+                    <tbody id="planner-tbody">
+                        <!-- Populated dynamically via JS -->
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="planner-goals-box">
+                <h4>Daily Achievement Dashboard</h4>
+                <div class="planner-table-wrapper">
+                    <table class="planner-table">
+                        <thead>
+                            <tr><th>Dimension</th><th>Today's Result</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>Learning</td><td><input type="text" id="dim-learning"></td></tr>
+                            <tr><td>Work/Wealth Creation</td><td><input type="text" id="dim-work"></td></tr>
+                            <tr><td>Relationships</td><td><input type="text" id="dim-relationships"></td></tr>
+                            <tr><td>Health/Inner Balance</td><td><input type="text" id="dim-health"></td></tr>
+                            <tr><td>Service/Contribution</td><td><input type="text" id="dim-service"></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="dash-grid">
+                    <div>
+                        <label style="font-size: 0.72rem; color: #38bdf8; font-weight:600;">3 Achievements Today:</label>
+                        <input type="text" id="achieve-1" placeholder="1." style="width:100%; margin-top:4px; margin-bottom:4px;">
+                        <input type="text" id="achieve-2" placeholder="2." style="width:100%; margin-bottom:4px;">
+                        <input type="text" id="achieve-3" placeholder="3." style="width:100%;">
+                    </div>
+                    <div>
+                        <div class="planner-group" style="margin-bottom:6px;">
+                            <label>One thing I will improve tomorrow</label>
+                            <input type="text" id="improve-tomorrow">
+                        </div>
+                        <div class="planner-group" style="margin-bottom:6px;">
+                            <label>One thing I am grateful for</label>
+                            <input type="text" id="grateful-for">
+                        </div>
+                        <div class="planner-group">
+                            <label>Tomorrow's most important goal</label>
+                            <input type="text" id="tomorrow-goal">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="btn-action-row">
+            <button class="lock-btn" onclick="savePlannerData()">💾 Save Entries</button>
+            <button class="download-pdf-btn" onclick="downloadEditablePDF()">📥 Download Editable Planner PDF</button>
+            <button class="print-btn" onclick="window.print()">🖨 Print</button>
+        </div>
+    </div>
+</div>
+
+<!-- Modals for Interpretation & Payment -->
 <div class="modal-overlay" id="interp-modal">
     <div class="modal-content">
         <button class="modal-close" onclick="closeInterpretationModal()">✕</button>
         <div class="modal-title" id="interp-title">Muhurta Interpretation</div>
-        <div class="interp-line">1. <span>Nature & Energy:</span> <span id="interp-l1" style="color:#cbd5e1;">--</span></div>
-        <div class="interp-line">2. <span>Recommended Actions:</span> <span id="interp-l2" style="color:#cbd5e1;">--</span></div>
-        <div class="interp-line">3. <span>Actions to Avoid:</span> <span id="interp-l3" style="color:#cbd5e1;">--</span></div>
-        <div class="interp-line">4. <span>Spiritual Rationale:</span> <span id="interp-l4" style="color:#cbd5e1;">--</span></div>
+        <div class="interp-line">1. <span>Nature & Energy:</span> <span id="interp-l1">--</span></div>
+        <div class="interp-line">2. <span>Recommended Actions:</span> <span id="interp-l2">--</span></div>
+        <div class="interp-line">3. <span>Actions to Avoid:</span> <span id="interp-l3">--</span></div>
+        <div class="interp-line">4. <span>Spiritual Rationale:</span> <span id="interp-l4">--</span></div>
     </div>
 </div>
 
-<!-- Tithi Interpretation Modal -->
 <div class="modal-overlay" id="tithi-modal">
     <div class="modal-content">
         <button class="modal-close" onclick="closeTithiModal()">✕</button>
         <div class="modal-title" id="tithi-modal-title">Tithi Panchang Interpretation</div>
-        <div class="interp-line">1. <span>Ruling Deity:</span> <span id="tithi-l1" style="color:#cbd5e1;">--</span></div>
-        <div class="interp-line">2. <span>Energy & Nature:</span> <span id="tithi-l2" style="color:#cbd5e1;">--</span></div>
-        <div class="interp-line">3. <span>Favorable Tasks:</span> <span id="tithi-l3" style="color:#cbd5e1;">--</span></div>
-        <div class="interp-line">4. <span>Unfavorable Tasks:</span> <span id="tithi-l4" style="color:#cbd5e1;">--</span></div>
+        <div class="interp-line">1. <span>Ruling Deity:</span> <span id="tithi-l1">--</span></div>
+        <div class="interp-line">2. <span>Energy & Nature:</span> <span id="tithi-l2">--</span></div>
+        <div class="interp-line">3. <span>Favorable Tasks:</span> <span id="tithi-l3">--</span></div>
+        <div class="interp-line">4. <span>Unfavorable Tasks:</span> <span id="tithi-l4">--</span></div>
     </div>
 </div>
 
-<!-- Dynamic UPI Payment QR & Prompt Modal -->
 <div class="modal-overlay" id="payment-modal">
     <div class="modal-content" style="text-align: center;">
         <button class="modal-close" onclick="closePaymentModal()">✕</button>
@@ -693,7 +872,7 @@
 </div>
 
 <script>
-// Preset Cities with exact UTC Offset in Hours
+// Preset Cities
 const presetCities = {
     deoria: { name: "Deoria, UP", lat: 26.5024, lon: 83.7781, tz: 5.5 },
     delhi: { name: "New Delhi", lat: 28.6139, lon: 77.2090, tz: 5.5 },
@@ -733,51 +912,51 @@ const tithiDetails = [
 
 // 15 Daytime Muhurtas
 const daytimeMuhurtas = [
-    { name: "1. रुद्र (Rudra)", nature: "Inauspicious", badge: "badge-inauspicious", deity: "रुद्र / शिव", act1: "Light Exercise", act2: "Intense Workout", act3: "Offer Water", act4: "Soft Breathing", l1: "Governed by fierce Rudra energy.", l2: "Solitary workouts, rigorous cleaning.", l3: "New business ventures, peace talks.", l4: "Aggressive energy requires internal grounding." },
-    { name: "2. अहिर (Ahi)", nature: "Inauspicious", badge: "badge-inauspicious", deity: "राहु / सर्प", act1: "Clean Room", act2: "Avoid Emails", act3: "Light Stretching", act4: "Chant Mantras", l1: "Ruled by serpent energy.", l2: "Organizing physical space, self-reflection.", l3: "Signing legal docs, conflicts.", l4: "Illusory forces active; stay cautious." },
-    { name: "3. मित्र (Mitra)", nature: "Auspicious", badge: "badge-auspicious", deity: "मित्र (सूर्य देव)", act1: "Start Homework", act2: "Team Meetings", act3: "Plan Finances", act4: "Morning Walk", l1: "Harmonious solar energy encouraging trust.", l2: "Collaborative projects, networking.", l3: "Confrontation, isolation.", l4: "Friendly radiation promotes smooth exchanges." },
-    { name: "4. पितृ (Pitri)", nature: "Inauspicious", badge: "badge-inauspicious", deity: "पितर (पितृगण)", act1: "Revise Notes", act2: "Organize Desk", act3: "Honor Ancestors", act4: "Rest Mind", l1: "Dedicated to ancestors.", l2: "Ancestral prayers, quiet study, auditing.", l3: "Celebrations, grand announcements.", l4: "Energy is introspective and respectful." },
-    { name: "5. वसु (Vasu)", nature: "Auspicious", badge: "badge-auspicious", deity: "अष्ट वसु", act1: "Learn Math", act2: "Execute Projects", act3: "Wealth Investment", act4: "Read Scriptures", l1: "Associated with abundance and material gain.", l2: "Financial investments, analytical work.", l3: "Reckless spending, frivolous arguments.", l4: "Vasus shower stability and growth." },
-    { name: "6. वराह (Varaha)", nature: "Auspicious", badge: "badge-auspicious", deity: "वराह विष्णु", act1: "Solve Test", act2: "Sign Contracts", act3: "Property Work", act4: "Garden Work", l1: "Resilient energy for overcoming obstacles.", l2: "Contract signing, land transactions.", l3: "Procrastination, hesitancy.", l4: "Varaha energy lifts burdens." },
-    { name: "7. विश्वेदेव (Vishvedeva)", nature: "Auspicious", badge: "badge-auspicious", deity: "विश्वेदेव", act1: "Group Study", act2: "Client Calls", act3: "Community Work", act4: "Socialize Friends", l1: "Universal cosmic harmony.", l2: "Public engagements, client discussions.", l3: "Egoistic disputes, selfish motives.", l4: "Supported by all deities." },
-    { name: "8. अभिजित् (Abhijit)", nature: "Very Auspicious", badge: "badge-very-auspicious", deity: "ब्रह्मा / हरि", act1: "Submit Work", act2: "Launch Products", act3: "Major Purchases", act4: "Special Prayers", l1: "Most victorious period of daytime.", l2: "Major launches, key purchases.", l3: "Southward travel.", l4: "Destroys all negative doshas." },
-    { name: "9. सतमुखी (Sutamukhi)", nature: "Auspicious", badge: "badge-auspicious", deity: "विश्वकर्मा", act1: "Art Craft", act2: "Creative Coding", act3: "Design Plans", act4: "Enjoy Music", l1: "Creative vibration ruled by Vishwakarma.", l2: "Designing, coding, art.", l3: "Monotonous administrative work.", l4: "Fosters creative flow." },
-    { name: "10. पुरुहूत (Puruhuta)", nature: "Auspicious", badge: "badge-auspicious", deity: "इन्द्र देव", act1: "Eat Lunch", act2: "Power Lunch", act3: "Balanced Meal", act4: "Light Food", l1: "Empowered energy associated with nourishment.", l2: "Meals, executive decisions.", l3: "Extreme fasting.", l4: "Indra's strength maintains vitality." },
-    { name: "11. वाहिन (Vahini)", nature: "Neutral", badge: "badge-neutral", deity: "अग्नि देव", act1: "Silent Reading", act2: "Routine Tasks", act3: "File Audits", act4: "Short Nap", l1: "Transformative fire element.", l2: "Data filing, routine execution.", l3: "Impulsive financial risks.", l4: "Fire energy requires composure." },
-    { name: "12. नक्तंचर (Naktanakara)", nature: "Inauspicious", badge: "badge-inauspicious", deity: "राक्षस / नैरृत", act1: "Avoid Fights", act2: "Pause Deals", act3: "Avoid Arguments", act4: "Stay Hydrated", l1: "Shadow period where clarity drops.", l2: "Hydration, light review.", l3: "Important negotiations.", l4: "Restless energy causes confusion." },
-    { name: "13. वरुण (Varuna)", nature: "Auspicious", badge: "badge-auspicious", deity: "वरुण देव", act1: "Outdoor Sports", act2: "Network Events", act3: "Travel Work", act4: "Evening Walk", l1: "Fluid water deity energy.", l2: "Travel, relationship building.", l3: "Stagnant work, lingering conflict.", l4: "Clears impurities." },
-    { name: "14. अर्यमा (Aryama)", nature: "Auspicious", badge: "badge-auspicious", deity: "अर्यमा", act1: "Play Games", act2: "Build Relationships", act3: "Family Time", act4: "Bless Youth", l1: "Warm social energy supporting family bonds.", l2: "Family bonding, mentorship.", l3: "Harsh business cuts.", l4: "Governs social harmony." },
-    { name: "15. भग (Bhaga)", nature: "Auspicious", badge: "badge-auspicious", deity: "भग (आदित्य देव)", act1: "Hobby Time", act2: "Wrap Work", act3: "Home Returns", act4: "Evening Aarti", l1: "Sunset transition bringer of luck.", l2: "Wrapping tasks, evening prayers.", l3: "Starting fresh long-term projects.", l4: "Prepares mind for twilight." }
+    { name: "1. रुद्र (Rudra)", nature: "Inauspicious", badge: "badge-inauspicious", deity: "रुद्र / शिव", act1: "Light Exercise", act2: "Intense Workout", act3: "Offer Water", act4: "Soft Breathing", defaultGoal: "Wake + water + movement + sunlight", l1: "Governed by fierce Rudra energy.", l2: "Solitary workouts, rigorous cleaning.", l3: "New business ventures, peace talks.", l4: "Aggressive energy requires internal grounding." },
+    { name: "2. अहिर (Ahi)", nature: "Inauspicious", badge: "badge-inauspicious", deity: "राहु / सर्प", act1: "Clean Room", act2: "Avoid Emails", act3: "Light Stretching", act4: "Chant Mantras", defaultGoal: "Pranayama/quiet mind + identify priority", l1: "Ruled by serpent energy.", l2: "Organizing physical space, self-reflection.", l3: "Signing legal docs, conflicts.", l4: "Illusory forces active; stay cautious." },
+    { name: "3. मित्र (Mitra)", nature: "Auspicious", badge: "badge-auspicious", deity: "मित्र (सूर्य देव)", act1: "Start Homework", act2: "Team Meetings", act3: "Plan Finances", act4: "Morning Walk", defaultGoal: "One meaningful human connection", l1: "Harmonious solar energy encouraging trust.", l2: "Collaborative projects, networking.", l3: "Confrontation, isolation.", l4: "Friendly radiation promotes smooth exchanges." },
+    { name: "4. पितृ (Pitri)", nature: "Inauspicious", badge: "badge-inauspicious", deity: "पितर (पितृगण)", act1: "Revise Notes", act2: "Organize Desk", act3: "Honor Ancestors", act4: "Rest Mind", defaultGoal: "Learn from one past experience/mentor", l1: "Dedicated to ancestors.", l2: "Ancestral prayers, quiet study, auditing.", l3: "Celebrations, grand announcements.", l4: "Energy is introspective and respectful." },
+    { name: "5. वसु (Vasu)", nature: "Auspicious", badge: "badge-auspicious", deity: "अष्ट वसु", act1: "Learn Math", act2: "Execute Projects", act3: "Wealth Investment", act4: "Read Scriptures", defaultGoal: "Start highest-value work", l1: "Associated with abundance and material gain.", l2: "Financial investments, analytical work.", l3: "Reckless spending, frivolous arguments.", l4: "Vasus shower stability and growth." },
+    { name: "6. वराह (Varaha)", nature: "Auspicious", badge: "badge-auspicious", deity: "वराह विष्णु", act1: "Solve Test", act2: "Sign Contracts", act3: "Property Work", act4: "Garden Work", defaultGoal: "Complete one difficult practical task", l1: "Resilient energy for overcoming obstacles.", l2: "Contract signing, land transactions.", l3: "Procrastination, hesitancy.", l4: "Varaha energy lifts burdens." },
+    { name: "7. विश्वेदेव (Vishvedeva)", nature: "Auspicious", badge: "badge-auspicious", deity: "विश्वेदेव", act1: "Group Study", act2: "Client Calls", act3: "Community Work", act4: "Socialize Friends", defaultGoal: "Collaborate/help someone", l1: "Universal cosmic harmony.", l2: "Public engagements, client discussions.", l3: "Egoistic disputes, selfish motives.", l4: "Supported by all deities." },
+    { name: "8. अभिजित् (Abhijit)", nature: "Very Auspicious", badge: "badge-very-auspicious", deity: "ब्रह्मा / हरि", act1: "Submit Work", act2: "Launch Products", act3: "Major Purchases", act4: "Special Prayers", defaultGoal: "Major achievement / deep-work block", l1: "Most victorious period of daytime Victory block.", l2: "Major launches, key purchases.", l3: "Southward travel.", l4: "Destroys all negative doshas." },
+    { name: "9. सतमुखी (Sutamukhi)", nature: "Auspicious", badge: "badge-auspicious", deity: "विश्वकर्मा", act1: "Art Craft", act2: "Creative Coding", act3: "Design Plans", act4: "Enjoy Music", defaultGoal: "Communication/networking", l1: "Creative vibration ruled by Vishwakarma.", l2: "Designing, coding, art.", l3: "Monotonous administrative work.", l4: "Fosters creative flow." },
+    { name: "10. पुरुहूत (Puruhuta)", nature: "Auspicious", badge: "badge-auspicious", deity: "इन्द्र देव", act1: "Eat Lunch", act2: "Power Lunch", act3: "Balanced Meal", act4: "Light Food", defaultGoal: "Leadership/important decision", l1: "Empowered energy associated with nourishment.", l2: "Meals, executive decisions.", l3: "Extreme fasting.", l4: "Indra's strength maintains vitality." },
+    { name: "11. वाहिन (Vahini)", nature: "Neutral", badge: "badge-neutral", deity: "अग्नि देव", act1: "Silent Reading", act2: "Routine Tasks", act3: "File Audits", act4: "Short Nap", defaultGoal: "Move pending work toward completion", l1: "Transformative fire element.", l2: "Data filing, routine execution.", l3: "Impulsive financial risks.", l4: "Fire energy requires composure." },
+    { name: "12. नक्तंचर (Naktanakara)", nature: "Inauspicious", badge: "badge-inauspicious", deity: "राक्षस / नैरृत", act1: "Avoid Fights", act2: "Pause Deals", act3: "Avoid Arguments", act4: "Stay Hydrated", defaultGoal: "Complete routine tasks; reduce stimulation", l1: "Shadow period where clarity drops.", l2: "Hydration, light review.", l3: "Important negotiations.", l4: "Restless energy causes confusion." },
+    { name: "13. वरुण (Varuna)", nature: "Auspicious", badge: "badge-auspicious", deity: "वरुण देव", act1: "Outdoor Sports", act2: "Network Events", act3: "Travel Work", act4: "Evening Walk", defaultGoal: "Health/finance/emotional check", l1: "Fluid water deity energy.", l2: "Travel, relationship building.", l3: "Stagnant work, lingering conflict.", l4: "Clears impurities." },
+    { name: "14. अर्यमा (Aryama)", nature: "Auspicious", badge: "badge-auspicious", deity: "अर्यमा", act1: "Play Games", act2: "Build Relationships", act3: "Family Time", act4: "Bless Youth", defaultGoal: "Service/mentoring/relationship", l1: "Warm social energy supporting family bonds.", l2: "Family bonding, mentorship.", l3: "Harsh business cuts.", l4: "Governs social harmony." },
+    { name: "15. भग (Bhaga)", nature: "Auspicious", badge: "badge-auspicious", deity: "भग (आदित्य देव)", act1: "Hobby Time", act2: "Wrap Work", act3: "Home Returns", act4: "Evening Aarti", defaultGoal: "Finish work + acknowledge achievements", l1: "Sunset transition bringer of luck.", l2: "Wrapping tasks, evening prayers.", l3: "Starting fresh long-term projects.", l4: "Prepares mind for twilight." }
 ];
 
 // 15 Nighttime Muhurtas
 const nighttimeMuhurtas = [
-    { name: "16. गिरीश (Girisha)", nature: "Auspicious", badge: "badge-auspicious", deity: "शिव (गिरीश)", act1: "Evening Prayer", act2: "Family Dinner", act3: "Reflect Day", act4: "Early Rest", l1: "Peaceful twilight energy.", l2: "Evening Aarti, family dinner.", l3: "Heated debates.", l4: "Stillness brings mental calmness." },
-    { name: "17. अजपाद (Ajapada)", nature: "Auspicious", badge: "badge-auspicious", deity: "अज एकपाद", act1: "Read Stories", act2: "Planning Tomorrow", act3: "Spiritual Reading", act4: "Peaceful Music", l1: "Mystical night energy.", l2: "Planning, spiritual reading.", l3: "Heavy physical labor.", l4: "Steady focus." },
-    { name: "18. अहिर्बुध्न्य (Ahirbudhnya)", nature: "Auspicious", badge: "badge-auspicious", deity: "अहिर्बुध्न्य", act1: "Light Reading", act2: "Meditation Practice", act3: "Relaxation Walk", act4: "Quiet Prayer", l1: "Deep energy supporting rest.", l2: "Meditation, relaxation.", l3: "Loud gatherings.", l4: "Protects resting minds." },
-    { name: "19. पुष्य (Pushya)", nature: "Auspicious", badge: "badge-auspicious", deity: "बृहस्पति", act1: "Bedtime Routine", act2: "Journal Thoughts", act3: "Gratitude Meditation", act4: "Night Prayers", l1: "Nourishing energy by Jupiter.", l2: "Bedtime gratitude, rest.", l3: "Negative thoughts.", l4: "Restores subtle body." },
-    { name: "20. अश्विनी (Ashwini)", nature: "Auspicious", badge: "badge-auspicious", deity: "अश्विनी कुमार", act1: "Deep Sleep", act2: "Deep Sleep", act3: "Deep Sleep", act4: "Deep Sleep", l1: "Healing energy of celestial physicians.", l2: "Restful sleep.", l3: "Staying awake.", l4: "Promotes cellular repair." },
-    { name: "21. यम (Yama)", nature: "Inauspicious", badge: "badge-inauspicious", deity: "यमराज", act1: "Rest Well", act2: "Rest Well", act3: "Rest Well", act4: "Rest Well", l1: "Midnight restraint energy.", l2: "Undisturbed sleep.", l3: "Night travel.", l4: "Time for physical dormancy." },
-    { name: "22. अग्नि (Agni)", nature: "Auspicious", badge: "badge-auspicious", deity: "अग्नि देव", act1: "Rest Well", act2: "Rest Well", act3: "Rest Well", act4: "Rest Well", l1: "Internal metabolic fire.", l2: "Peaceful slumber.", l3: "Late night eating.", l4: "Purifies internal system." },
-    { name: "23. विधाता (Vidhata)", nature: "Auspicious", badge: "badge-auspicious", deity: "विधाता / विधि", act1: "Rest Well", act2: "Rest Well", act3: "Rest Well", act4: "Rest Well", l1: "Destiny shaping quiet period.", l2: "Sound sleep.", l3: "Anxiety.", l4: "Subconscious aligns with cosmos." },
-    { name: "24. कण्ड (Kanda)", nature: "Neutral", badge: "badge-neutral", deity: "चन्द्र देव (सोम)", act1: "Rest Well", act2: "Rest Well", act3: "Rest Well", act4: "Rest Well", l1: "Cool lunar energy.", l2: "Restful sleep.", l3: "Screen light.", l4: "Restores emotional balance." },
-    { name: "25. अदिति (Aditi)", nature: "Auspicious", badge: "badge-auspicious", deity: "अदिति", act1: "Rest Well", act2: "Rest Well", act3: "Rest Well", act4: "Rest Well", l1: "Motherly protective energy.", l2: "Uninterrupted sleep.", l3: "Stressful awakenings.", l4: "Provides security." },
-    { name: "26. अमृत / जीव (Amrita)", nature: "Very Auspicious", badge: "badge-very-auspicious", deity: "धन्वन्तरि", act1: "Sweet Dreams", act2: "Deep Meditation", act3: "Deep Meditation", act4: "Early Awakening", l1: "Nectarine spiritual energy.", l2: "Meditation, deep reflection.", l3: "Slothfulness.", l4: "Infuses life force." },
-    { name: "27. विष्णु (Vishnu)", nature: "Auspicious", badge: "badge-auspicious", deity: "भगवान् विष्णु", act1: "Quiet Rest", act2: "Brahma Muhurta", act3: "Brahma Muhurta", act4: "Spiritual Study", l1: "Sustaining divine energy.", l2: "Early awakening, chanting.", l3: "Over-sleeping.", l4: "Sustains mental clarity." },
-    { name: "28. द्युमद्गद्युति (Dyumadgadyuti)", nature: "Auspicious", badge: "badge-auspicious", deity: "सूर्य", act1: "Early Awake", act2: "Morning Yoga", act3: "Morning Prayers", act4: "Gentle Stretch", l1: "Pre-dawn rays of solar awakening.", l2: "Yoga, pranayama.", l3: "Staying in bed late.", l4: "Ignites bodily vitality." },
-    { name: "29. ब्रह्म (Brahma)", nature: "Spiritual", badge: "badge-auspicious", deity: "ब्रह्मदेव", act1: "Study / Prayer", act2: "Meditation / Yoga", act3: "Chanting / Japa", act4: "Holy Thoughts", l1: "Sacred Brahma Muhurta.", l2: "Meditation, mantra chanting.", l3: "Heavy food.", l4: "Highest intellect capacity." },
-    { name: "30. समुद्र (Samudra)", nature: "Auspicious", badge: "badge-auspicious", deity: "समुद्र देव", act1: "Prepare School", act2: "Morning Walk", act3: "Sunrise Worship", act4: "Morning Prayer", l1: "Oceanic energy prior to sunrise.", l2: "Bathing, day preparation.", l3: "Arguments.", l4: "Cleanses auric energy." }
+    { name: "16. गिरीश (Girisha)", nature: "Auspicious", badge: "badge-auspicious", deity: "शिव (गिरीश)", act1: "Evening Prayer", act2: "Family Dinner", act3: "Reflect Day", act4: "Early Rest", defaultGoal: "Leave work; family/quiet walk", l1: "Peaceful twilight energy.", l2: "Evening Aarti, family dinner.", l3: "Heated debates.", l4: "Stillness brings mental calmness." },
+    { name: "17. अजपाद (Ajapada)", nature: "Auspicious", badge: "badge-auspicious", deity: "अज एकपाद", act1: "Read Stories", act2: "Planning Tomorrow", act3: "Spiritual Reading", act4: "Peaceful Music", defaultGoal: "Stretching + relaxation", l1: "Mystical night energy.", l2: "Planning, spiritual reading.", l3: "Heavy physical labor.", l4: "Steady focus." },
+    { name: "18. अहिर्बुध्न्य (Ahirbudhnya)", nature: "Auspicious", badge: "badge-auspicious", deity: "अहिर्बुध्न्य", act1: "Light Reading", act2: "Meditation Practice", act3: "Relaxation Walk", act4: "Quiet Prayer", defaultGoal: "Identify tomorrow's key problem", l1: "Deep energy supporting rest.", l2: "Meditation, relaxation.", l3: "Loud gatherings.", l4: "Protects resting minds." },
+    { name: "19. पुष्य (Pushya)", nature: "Auspicious", badge: "badge-auspicious", deity: "बृहस्पति", act1: "Bedtime Routine", act2: "Journal Thoughts", act3: "Gratitude Meditation", act4: "Night Prayers", defaultGoal: "Nourishing dinner + family time", l1: "Nourishing energy by Jupiter.", l2: "Bedtime gratitude, rest.", l3: "Negative thoughts.", l4: "Restores subtle body." },
+    { name: "20. अश्विनी (Ashwini)", nature: "Auspicious", badge: "badge-auspicious", deity: "अश्विनी कुमार", act1: "Deep Sleep", act2: "Deep Sleep", act3: "Deep Sleep", act4: "Deep Sleep", defaultGoal: "Personal care/hygiene", l1: "Healing energy of celestial physicians.", l2: "Restful sleep.", l3: "Staying awake.", l4: "Promotes cellular repair." },
+    { name: "21. यम (Yama)", nature: "Inauspicious", badge: "badge-inauspicious", deity: "यमराज", act1: "Rest Well", act2: "Rest Well", act3: "Rest Well", act4: "Rest Well", defaultGoal: "Digital/work curfew", l1: "Midnight restraint energy.", l2: "Undisturbed sleep.", l3: "Night travel.", l4: "Time for physical dormancy." },
+    { name: "22. अग्नि (Agni)", nature: "Auspicious", badge: "badge-auspicious", deity: "अग्नि देव", act1: "Rest Well", act2: "Rest Well", act3: "Rest Well", act4: "Rest Well", defaultGoal: "Write unfinished tasks; mentally release work", l1: "Internal metabolic fire.", l2: "Peaceful slumber.", l3: "Late night eating.", l4: "Purifies internal system." },
+    { name: "23. विधाता (Vidhata)", nature: "Auspicious", badge: "badge-auspicious", deity: "विधाता / विधि", act1: "Rest Well", act2: "Rest Well", act3: "Rest Well", act4: "Rest Well", defaultGoal: "Prepare tomorrow's environment/priorities", l1: "Destiny shaping quiet period.", l2: "Sound sleep.", l3: "Anxiety.", l4: "Subconscious aligns with cosmos." },
+    { name: "24. कण्ड (Kanda)", nature: "Neutral", badge: "badge-neutral", deity: "चन्द्र देव (सोम)", act1: "Rest Well", act2: "Rest Well", act3: "Rest Well", act4: "Rest Well", defaultGoal: "Go to sleep", l1: "Cool lunar energy.", l2: "Restful sleep.", l3: "Screen light.", l4: "Restores emotional balance." },
+    { name: "25. अदिति (Aditi)", nature: "Auspicious", badge: "badge-auspicious", deity: "अदिति", act1: "Rest Well", act2: "Rest Well", act3: "Rest Well", act4: "Rest Well", defaultGoal: "Deep restorative sleep", l1: "Motherly protective energy.", l2: "Uninterrupted sleep.", l3: "Stressful awakenings.", l4: "Provides security." },
+    { name: "26. अमृत / जीव (Amrita)", nature: "Very Auspicious", badge: "badge-very-auspicious", deity: "धन्वन्तरि", act1: "Sweet Dreams", act2: "Deep Meditation", act3: "Deep Meditation", act4: "Early Awakening", defaultGoal: "Protect uninterrupted sleep", l1: "Nectarine spiritual energy.", l2: "Meditation, deep reflection.", l3: "Slothfulness.", l4: "Infuses life force." },
+    { name: "27. विष्णु (Vishnu)", nature: "Auspicious", badge: "badge-auspicious", deity: "भगवान् विष्णु", act1: "Quiet Rest", act2: "Brahma Muhurta", act3: "Brahma Muhurta", act4: "Spiritual Study", defaultGoal: "Maintain darkness/quiet", l1: "Sustaining divine energy.", l2: "Early awakening, chanting.", l3: "Over-sleeping.", l4: "Sustains mental clarity." },
+    { name: "28. द्युमद्गद्युति (Dyumadgadyuti)", nature: "Auspicious", badge: "badge-auspicious", deity: "सूर्य", act1: "Early Awake", act2: "Morning Yoga", act3: "Morning Prayers", act4: "Gentle Stretch", defaultGoal: "Natural awakening/quiet awareness", l1: "Pre-dawn rays of solar awakening.", l2: "Yoga, pranayama.", l3: "Staying in bed late.", l4: "Ignites bodily vitality." },
+    { name: "29. ब्रह्म (Brahma)", nature: "Spiritual", badge: "badge-auspicious", deity: "ब्रह्मदेव", act1: "Study / Prayer", act2: "Meditation / Yoga", act3: "Chanting / Japa", act4: "Holy Thoughts", defaultGoal: "Meditation/study/prayer/yoga", l1: "Sacred Brahma Muhurta.", l2: "Meditation, mantra chanting.", l3: "Heavy food.", l4: "Highest intellect capacity." },
+    { name: "30. समुद्र (Samudra)", nature: "Auspicious", badge: "badge-auspicious", deity: "समुद्र देव", act1: "Prepare School", act2: "Morning Walk", act3: "Sunrise Worship", act4: "Morning Prayer", defaultGoal: "Gratitude + prepare for sunrise", l1: "Oceanic energy prior to sunrise.", l2: "Bathing, day preparation.", l3: "Arguments.", l4: "Cleanses auric energy." }
 ];
 
 // Lock Screen Unlock
 function unlockWatch() {
     const val = document.getElementById('passcode-input').value.trim().toLowerCase();
-    const words = val.split(/\s+/);
-    const count = words.filter(w => w === 'sitaram').length;
+    const matched = val.match(/sitaram/g);
 
-    if (count === 5 && words.length === 5) {
+    if (matched && matched.length === 5) {
         document.getElementById('lock-screen').style.display = 'none';
         document.getElementById('clock-card').style.display = 'block';
+        document.getElementById('lock-error').style.display = 'none';
     } else {
         document.getElementById('lock-error').style.display = 'block';
     }
@@ -837,7 +1016,7 @@ function calculateSunriseSunset(date, lat, lon, tzOffset) {
     };
 }
 
-// Approximate Tithi Panchang Algorithm
+// Tithi Calculation Algorithm
 function calculateTithiPanchang(date) {
     const knownNewMoon = new Date('2024-01-11T11:57:00Z');
     const synodicMonthDays = 29.53058770576;
@@ -987,8 +1166,20 @@ function updateVedicClock() {
     // Muhurta Calculation
     const details = getMuhurtaDetails(geoNow, activeTabOffset);
     
-    document.getElementById('sunrise-time').innerText = formatShortTime(details.sunrise);
-    document.getElementById('sunset-time').innerText = formatShortTime(details.sunset);
+    const srStr = formatShortTime(details.sunrise);
+    const ssStr = formatShortTime(details.sunset);
+
+    document.getElementById('sunrise-time').innerText = srStr;
+    document.getElementById('sunset-time').innerText = ssStr;
+
+    // Sync to Daily Planner
+    const planSr = document.getElementById('plan-sunrise');
+    const planSs = document.getElementById('plan-sunset');
+    if (planSr) planSr.value = srStr;
+    if (planSs) planSs.value = ssStr;
+
+    // Refresh Planner Times Dynamically
+    renderPlannerTable();
 
     // Calculate Ghati, Pal, Vipal baseline
     let dayStart = new Date(details.sunrise);
@@ -1024,7 +1215,142 @@ function updateVedicClock() {
     document.getElementById('act-60').innerText = target.act4;
 }
 
+// Render Planner Rows Dynamically with Muhurta Elapsing Time Slots
+function renderPlannerTable() {
+    const tbody = document.getElementById('planner-tbody');
+    if (!tbody) return;
+
+    const geoNow = getTargetGeoTime(currentTz);
+    const sunTimes = calculateSunriseSunset(geoNow, currentLat, currentLon, currentTz);
+    const sunrise = sunTimes.sunrise;
+    const sunset = sunTimes.sunset;
+
+    const dayDurationMs = sunset - sunrise;
+    const nightDurationMs = (24 * 3600 * 1000) - dayDurationMs;
+
+    const dayMuhurtaLen = dayDurationMs / 15;
+    const nightMuhurtaLen = nightDurationMs / 15;
+
+    // Save existing user input state prior to re-rendering table
+    const existingInputs = {};
+    const currentInputs = document.querySelectorAll('#planner-tbody input[type="text"]');
+    currentInputs.forEach(input => {
+        if (input.id) existingInputs[input.id] = input.value;
+    });
+
+    let html = `<tr class="planner-section-hdr"><td colspan="5">DAY — CREATE & ACHIEVE (AFTER SUNRISE)</td></tr>`;
+
+    daytimeMuhurtas.forEach((m, idx) => {
+        const id = idx + 1;
+        const start = new Date(sunrise.getTime() + idx * dayMuhurtaLen);
+        const end = new Date(sunrise.getTime() + (idx + 1) * dayMuhurtaLen);
+        const timeSlotStr = `${formatShortTime(start)} – ${formatShortTime(end)}`;
+
+        html += `
+            <tr>
+                <td>${id}</td>
+                <td><strong>${m.name.split('.')[1] ? m.name.split('.')[1].trim() : m.name}</strong></td>
+                <td class="time-slot-cell">${timeSlotStr}</td>
+                <td>${m.defaultGoal}</td>
+                <td><input type="text" id="custom-goal-${id}" placeholder="My goal..." value="${existingInputs[`custom-goal-${id}`] || ''}"></td>
+            </tr>`;
+    });
+
+    html += `<tr class="planner-section-hdr"><td colspan="5">NIGHT — RELEASE & RESTORE (AFTER SUNSET)</td></tr>`;
+
+    nighttimeMuhurtas.forEach((m, idx) => {
+        const id = idx + 16;
+        const start = new Date(sunset.getTime() + idx * nightMuhurtaLen);
+        const end = new Date(sunset.getTime() + (idx + 1) * nightMuhurtaLen);
+        const timeSlotStr = `${formatShortTime(start)} – ${formatShortTime(end)}`;
+
+        html += `
+            <tr>
+                <td>${id}</td>
+                <td><strong>${m.name.split('.')[1] ? m.name.split('.')[1].trim() : m.name}</strong></td>
+                <td class="time-slot-cell">${timeSlotStr}</td>
+                <td>${m.defaultGoal}</td>
+                <td><input type="text" id="custom-goal-${id}" placeholder="My goal..." value="${existingInputs[`custom-goal-${id}`] || ''}"></td>
+            </tr>`;
+    });
+
+    tbody.innerHTML = html;
+}
+
+// Download High-Quality Vector Editable Planner PDF via html2pdf
+function downloadEditablePDF() {
+    const targetElement = document.getElementById('pdf-export-container');
+    
+    // Temporarily apply printable light theme classes
+    targetElement.classList.add('pdf-export-mode');
+
+    const opt = {
+        margin:       [10, 10, 10, 10],
+        filename:     `Vedic_Daily_Planner_${new Date().toISOString().slice(0,10)}.pdf`,
+        image:        { type: 'jpeg', quality: 0.98 },
+        html2canvas:  { scale: 2, useCORS: true, logging: false },
+        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    };
+
+    // Execute PDF download
+    html2pdf().set(opt).from(targetElement).save().then(() => {
+        // Revert modal theme back to dark styling after export finishes
+        targetElement.classList.remove('pdf-export-mode');
+    });
+}
+
+// Local Storage Handlers
+function savePlannerData() {
+    const inputs = document.querySelectorAll('#planner-modal input');
+    const data = {};
+    inputs.forEach(input => {
+        if (input.id) data[input.id] = input.value;
+    });
+    localStorage.setItem('vedic_watch_planner_data', JSON.stringify(data));
+    alert('Planner entries saved successfully!');
+}
+
+function loadPlannerData() {
+    const saved = localStorage.getItem('vedic_watch_planner_data');
+    if (!saved) return;
+    const data = JSON.parse(saved);
+    Object.keys(data).forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = data[id];
+    });
+}
+
 // Modal Handlers
+function openPlannerModal() {
+    document.getElementById('planner-modal').style.display = 'flex';
+}
+
+function closePlannerModal() {
+    document.getElementById('planner-modal').style.display = 'none';
+}
+
+function openManualModal() {
+    document.getElementById('manual-modal').style.display = 'flex';
+}
+
+function closeManualModal() {
+    document.getElementById('manual-modal').style.display = 'none';
+}
+
+function switchManualLang(lang) {
+    if (lang === 'en') {
+        document.getElementById('manual-en').classList.add('active');
+        document.getElementById('manual-hi').classList.remove('active');
+        document.getElementById('m-tab-en').classList.add('active');
+        document.getElementById('m-tab-hi').classList.remove('active');
+    } else {
+        document.getElementById('manual-hi').classList.add('active');
+        document.getElementById('manual-en').classList.remove('active');
+        document.getElementById('m-tab-hi').classList.add('active');
+        document.getElementById('m-tab-en').classList.remove('active');
+    }
+}
+
 function openInterpretationModal() {
     if (!cachedSelectedMuhurta) return;
     document.getElementById('interp-title').innerText = "Interpretation: " + cachedSelectedMuhurta.name;
@@ -1062,7 +1388,9 @@ function closePaymentModal() {
     document.getElementById('payment-modal').style.display = 'none';
 }
 
-// Initial Call and Loop
+// Initial Execution
+renderPlannerTable();
+loadPlannerData();
 setInterval(updateVedicClock, 400);
 updateVedicClock();
 </script>
